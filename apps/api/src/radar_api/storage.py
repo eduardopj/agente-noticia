@@ -60,6 +60,7 @@ def create_episode(
         existing.briefing_markdown = briefing_markdown
         existing.script_markdown = script_markdown
         existing.audio_url = audio_url
+        existing.whatsapp_status = "not_sent"
         existing.summary_input_tokens = summary_input_tokens
         existing.summary_output_tokens = summary_output_tokens
         existing.script_input_tokens = script_input_tokens

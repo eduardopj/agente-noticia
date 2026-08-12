@@ -35,9 +35,10 @@ def generate_script(briefing_markdown: str) -> TextResult:
             {
                 "role": "user",
                 "content": (
-                    "Transforme o briefing em uma conversa de 8 a 12 minutos. "
+                    "Transforme o briefing em uma conversa de 4 a 6 minutos, objetiva e informativa. "
                     "Comece pelas noticias mais importantes do Brasil e do mundo, depois IA/devtools, "
                     "videos relevantes e, por fim, papers academicos. "
+                    "Priorize o que muda decisao, aula, estudo ou desenvolvimento; corte detalhes secundarios. "
                     "Explique papers em ingles em portugues do Brasil. "
                     "Nao leia URLs em voz alta. "
                     "Escreva falas sempre no formato 'Lia:' e 'Goku:' para permitir vozes separadas.\n\n"

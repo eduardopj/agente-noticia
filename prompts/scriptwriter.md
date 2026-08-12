@@ -27,3 +27,4 @@ Regras:
 - Explique papers em portugues do Brasil.
 - Diferencie noticia confirmada, rumor, opiniao, release corporativo e paper.
 - Nao deixe o bloco academico dominar a conversa.
+- O audio deve caber em 4 a 6 minutos. O briefing escrito pode ser mais completo; o podcast deve ser o resumo conversado para ouvir no deslocamento.
