@@ -53,6 +53,13 @@ type Stats = {
   pending_validation: number;
 };
 
+type ClassifiedGroup = {
+  key: string;
+  title: string;
+  description: string;
+  sources: Source[];
+};
+
 const apiUrl = process.env.API_BASE_URL || "http://localhost:8000";
 
 async function validateSource(formData: FormData) {
@@ -94,11 +101,12 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: Promise<{ date?: string }>;
+  searchParams?: Promise<{ date?: string; grupo?: string }>;
 }) {
   const params = await searchParams;
   const episodes = await fetchJson<Episode[]>("/episodes", []);
   const selectedDate = params?.date;
+  const selectedGroup = params?.grupo || "todos";
   const episode = selectedDate
     ? await fetchJson<Episode | null>(`/episodes/${selectedDate}`, null)
     : await fetchJson<Episode | null>("/episodes/latest", null);
@@ -113,9 +121,13 @@ export default async function Home({
     pending_validation: 0,
   });
 
-  const academicSources = sources.filter((source) => source.category === "academico");
-  const generalSources = sources.filter((source) => source.category !== "academico");
   const pendingInEpisode = sources.filter((source) => source.validation_status === "pending").length;
+  const trustedInEpisode = sources.filter((source) => source.validation_status === "trusted").length;
+  const groups = buildSourceGroups(sources);
+  const visibleGroups =
+    selectedGroup === "todos" ? groups : groups.filter((group) => group.key === selectedGroup);
+  const categoryCards = buildCategoryCards(sources);
+  const episodeUrl = activeEpisode ? `/?date=${activeEpisode.episode_date}` : "/";
 
   return (
     <main>
@@ -123,7 +135,9 @@ export default async function Home({
         <div>
           <p className="eyebrow">Radar diario</p>
           <h1>Tech IA</h1>
-          <p className="subtitle">Noticias, IA, tecnologia global, videos e pesquisa academica em um painel unico.</p>
+          <p className="subtitle">
+            Noticias, IA, tecnologia global, videos e pesquisa academica em uma central diaria de validacao.
+          </p>
         </div>
         <div className="liveBadge">
           <span>WhatsApp</span>
@@ -131,79 +145,102 @@ export default async function Home({
         </div>
       </header>
 
-      <section className="hero">
-        <div className="heroMain">
-          <p className="date">{activeEpisode ? activeEpisode.episode_date_br : "Nenhum episodio gerado"}</p>
-          <h2>{activeEpisode?.title || "Aguardando o primeiro radar"}</h2>
-          <p>{activeEpisode?.executive_summary || "Execute o job diario para coletar noticias, videos e artigos academicos."}</p>
-          <div className="heroActions">
-            <a href="#fontes">Validar fontes</a>
-            {activeEpisode?.audio_url ? <a href={activeEpisode.audio_url}>Ouvir audio</a> : null}
+      <section className="homeGrid">
+        <article className="spotlight">
+          <div className="spotlightCopy">
+            <p className="eyebrow">Episodio em destaque</p>
+            <span className="date">{activeEpisode ? activeEpisode.episode_date_br : "Nenhum episodio gerado"}</span>
+            <h2>{activeEpisode?.title || "Aguardando o primeiro radar"}</h2>
+            <p>
+              {activeEpisode?.executive_summary ||
+                "Execute o job diario para coletar noticias, videos e artigos academicos."}
+            </p>
+            <div className="heroActions">
+              <a href="#briefing">Ler resumo</a>
+              <a href="#fontes">Validar fontes</a>
+              {activeEpisode?.audio_url ? <a href={activeEpisode.audio_url}>Ouvir audio</a> : null}
+            </div>
           </div>
-        </div>
-        <div className="audioPanel">
-          <span>Audio do dia</span>
-          {activeEpisode?.audio_url ? (
-            <audio controls src={activeEpisode.audio_url} />
-          ) : (
-            <p>Audio ainda nao gerado.</p>
-          )}
-        </div>
+          <div className="episodePlayer">
+            <span>Resumo e audio</span>
+            <strong>{activeEpisode?.episode_date_short_br || "--/--/----"}</strong>
+            {activeEpisode?.audio_url ? <audio controls src={activeEpisode.audio_url} /> : <p>Audio ainda nao gerado.</p>}
+            <a href={episodeUrl}>Link deste episodio</a>
+          </div>
+        </article>
+
+        <aside className="episodeLibrary">
+          <div className="sectionHeader compact">
+            <p className="eyebrow">Todos os episodios</p>
+            <h3>Historico diario</h3>
+          </div>
+          <div className="episodeList">
+            {episodes.length === 0 ? (
+              <p className="empty">Nenhum registro diario ainda.</p>
+            ) : (
+              episodes.map((item) => (
+                <Link
+                  className={`episodeRow ${activeEpisode?.id === item.id ? "active" : ""}`}
+                  href={`/?date=${item.episode_date}`}
+                  key={item.id}
+                >
+                  <span>{item.episode_date_short_br}</span>
+                  <strong>{item.title}</strong>
+                  <small>
+                    {formatUsd(item.estimated_cost_usd)} / {formatBrl(item.estimated_cost_brl)}
+                  </small>
+                </Link>
+              ))
+            )}
+          </div>
+        </aside>
       </section>
 
       <section className="statsGrid">
         <StatCard label="Episodios" value={stats.episodes} />
         <StatCard label="Fontes salvas" value={stats.sources} />
-        <StatCard label="Pendentes neste dia" value={pendingInEpisode} />
-        <StatCard label="Custo estimado" value={`${formatUsd(activeEpisode?.estimated_cost_usd || 0)} / ${formatBrl(activeEpisode?.estimated_cost_brl || 0)}`} />
+        <StatCard label="Academicas" value={stats.academic_sources} />
+        <StatCard label="Custo deste episodio" value={`${formatUsd(activeEpisode?.estimated_cost_usd || 0)} / ${formatBrl(activeEpisode?.estimated_cost_brl || 0)}`} />
+      </section>
+
+      <section className="classificationPanel">
+        <div className="sectionHeader compact">
+          <p className="eyebrow">Classificacoes</p>
+          <h3>Assuntos e fontes deste episodio</h3>
+        </div>
+        <div className="classificationGrid">
+          {categoryCards.map((card) => (
+            <a href={`#${card.anchor}`} className="classificationCard" key={card.key}>
+              <span>{card.label}</span>
+              <strong>{card.count}</strong>
+              <small>{card.description}</small>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section className="costPanel">
         <div>
           <span>Uso do episodio</span>
           <strong>
-            Texto: {(activeEpisode?.summary_input_tokens || 0) + (activeEpisode?.script_input_tokens || 0)} tokens de entrada,
-            {" "}
-            {(activeEpisode?.summary_output_tokens || 0) + (activeEpisode?.script_output_tokens || 0)} de saida.
-            {" "}
-            Audio: {activeEpisode?.estimated_audio_minutes?.toFixed(1) || "0.0"} min estimados.
+            Texto: {(activeEpisode?.summary_input_tokens || 0) + (activeEpisode?.script_input_tokens || 0)} tokens de entrada,{" "}
+            {(activeEpisode?.summary_output_tokens || 0) + (activeEpisode?.script_output_tokens || 0)} de saida. Audio:{" "}
+            {activeEpisode?.estimated_audio_minutes?.toFixed(1) || "0.0"} min estimados.
           </strong>
         </div>
         <div>
-          <span>Gerado em</span>
-          <strong>{activeEpisode?.created_at_br || "Aguardando geracao"}</strong>
-        </div>
-      </section>
-
-      <section className="historyPanel">
-        <div className="sectionHeader compact">
-          <p className="eyebrow">Historico</p>
-          <h3>Tudo que ja foi gerado</h3>
-        </div>
-        <div className="episodeStrip">
-          {episodes.length === 0 ? (
-            <p className="empty">Nenhum registro diario ainda.</p>
-          ) : (
-            episodes.map((item) => (
-              <Link
-                className={`episodeCard ${activeEpisode?.id === item.id ? "active" : ""}`}
-                href={`/?date=${item.episode_date}`}
-                key={item.id}
-              >
-                <span>{item.episode_date_short_br}</span>
-                <strong>{formatUsd(item.estimated_cost_usd)} / {formatBrl(item.estimated_cost_brl)}</strong>
-                <small>{labelWhatsapp(item.whatsapp_status)}</small>
-              </Link>
-            ))
-          )}
+          <span>Validacao</span>
+          <strong>
+            {trustedInEpisode} aprovadas | {pendingInEpisode} pendentes
+          </strong>
         </div>
       </section>
 
       <section className="grid">
-        <article className="briefing">
+        <article className="briefing" id="briefing">
           <div className="sectionHeader">
             <p className="eyebrow">Briefing</p>
-            <h3>Resumo e contexto</h3>
+            <h3>Resumo, contexto e proximos passos</h3>
           </div>
           <pre>{activeEpisode?.briefing_markdown || "Sem briefing disponivel."}</pre>
         </article>
@@ -212,7 +249,7 @@ export default async function Home({
           <div className="sectionHeader sourceHeader">
             <div>
               <p className="eyebrow">Validacao</p>
-              <h3>Fontes deste episodio</h3>
+              <h3>Fontes organizadas</h3>
             </div>
             {activeEpisode ? (
               <form action={validateEpisodeSources}>
@@ -221,14 +258,25 @@ export default async function Home({
               </form>
             ) : null}
           </div>
+          <nav className="sourceFilters">
+            <Link className={selectedGroup === "todos" ? "active" : ""} href={`/?date=${activeEpisode?.episode_date || ""}#fontes`}>
+              Todas
+            </Link>
+            {groups.map((group) => (
+              <Link
+                className={selectedGroup === group.key ? "active" : ""}
+                href={`/?date=${activeEpisode?.episode_date || ""}&grupo=${group.key}#fontes`}
+                key={group.key}
+              >
+                {group.title}
+              </Link>
+            ))}
+          </nav>
           <div className="sourceList">
             {sources.length === 0 ? (
               <p className="empty">Nenhuma fonte coletada ainda.</p>
             ) : (
-              <>
-                <SourceGroup title="Noticias, videos e tecnologia" sources={generalSources} />
-                <SourceGroup title="Artigos academicos" sources={academicSources} />
-              </>
+              visibleGroups.map((group) => <SourceGroup group={group} key={group.key} />)
             )}
           </div>
         </aside>
@@ -246,12 +294,15 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
-  if (sources.length === 0) return null;
+function SourceGroup({ group }: { group: ClassifiedGroup }) {
+  if (group.sources.length === 0) return null;
   return (
-    <div className="sourceGroup">
-      <h4>{title}</h4>
-      {sources.map((source) => (
+    <div className="sourceGroup" id={group.key}>
+      <h4>
+        {group.title}
+        <small>{group.description}</small>
+      </h4>
+      {group.sources.map((source) => (
         <div className="sourceItem" key={source.id}>
           <div className="sourceMeta">
             <span>{source.source_name}</span>
@@ -261,8 +312,9 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
             <strong>{source.title}</strong>
           </a>
           <small>
-            {source.category} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
+            {labelCategory(source.category)} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
           </small>
+          {source.authors ? <small>Autores: {source.authors}</small> : null}
           {source.published_at_br ? <small>Publicado em: {source.published_at_br}</small> : null}
           {source.updated_at_br ? <small>Atualizado em: {source.updated_at_br}</small> : null}
           <form action={validateSource} className="validationActions">
@@ -275,6 +327,78 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
       ))}
     </div>
   );
+}
+
+function buildSourceGroups(sources: Source[]): ClassifiedGroup[] {
+  const definitions: Omit<ClassifiedGroup, "sources">[] = [
+    { key: "academicas", title: "Academicas", description: "Papers, revistas e indexadores cientificos." },
+    { key: "portais-br", title: "Portais BR", description: "Canaltech, TecMundo, Tecnoblog e portais nacionais." },
+    { key: "jornais", title: "Jornais", description: "Cobertura jornalistica e impacto publico." },
+    { key: "videos", title: "Videos", description: "Canais do YouTube e conteudo em video." },
+    { key: "fontes-primarias", title: "Primarias", description: "Blogs oficiais, empresas, laboratorios e projetos." },
+    { key: "globais", title: "Mundo", description: "Portais internacionais de tecnologia e mercado." },
+    { key: "infra-seguranca", title: "Infra e seguranca", description: "Chips, cloud, devtools e ciberseguranca." },
+    { key: "outras", title: "Outras", description: "Itens relevantes fora dos grupos principais." },
+  ];
+  return definitions
+    .map((definition) => ({
+      ...definition,
+      sources: sources.filter((source) => classifySource(source) === definition.key),
+    }))
+    .filter((group) => group.sources.length > 0);
+}
+
+function buildCategoryCards(sources: Source[]) {
+  const groups = buildSourceGroups(sources);
+  return groups.map((group) => ({
+    key: group.key,
+    anchor: group.key,
+    label: group.title,
+    count: group.sources.length,
+    description: group.description,
+  }));
+}
+
+function classifySource(source: Source) {
+  if (source.category === "academico" || source.source_type === "paper" || source.source_type === "academic_press") {
+    return "academicas";
+  }
+  if (source.source_type === "video" || source.category.startsWith("video_")) {
+    return "videos";
+  }
+  if (source.source_type === "primary") {
+    return "fontes-primarias";
+  }
+  if (source.source_name.toLowerCase().includes("g1") || source.source_name.toLowerCase().includes("folha")) {
+    return "jornais";
+  }
+  if (source.source_type === "press_br" || source.category.includes("brasil")) {
+    return "portais-br";
+  }
+  if (["devtools", "hardware_ia", "seguranca", "open_source"].includes(source.category)) {
+    return "infra-seguranca";
+  }
+  if (source.source_type === "press" || source.category.includes("global")) {
+    return "globais";
+  }
+  return "outras";
+}
+
+function labelCategory(category: string) {
+  const labels: Record<string, string> = {
+    academico: "academico",
+    brasil_tecnologia: "tecnologia no Brasil",
+    brasil_negocios_tech: "negocios tech no Brasil",
+    ia_global: "IA global",
+    tecnologia_global: "tecnologia global",
+    open_source: "open source",
+    devtools: "devtools",
+    hardware_ia: "hardware e IA",
+    seguranca: "seguranca",
+    video_brasil: "video brasileiro",
+    video_global: "video global",
+  };
+  return labels[category] || category;
 }
 
 function labelValidation(status?: string) {

@@ -270,11 +270,17 @@ async def collect_semantic_scholar(max_results_per_query: int = 4) -> list[Colle
 
 async def collect_academic(max_results_per_query: int = 4) -> list[CollectedItem]:
     results = await asyncio_gather_academic(max_results_per_query)
-    unique = {item.url: item for group in results for item in group if item.url}
+    unique = {
+        item.url: item
+        for group in results
+        if isinstance(group, list)
+        for item in group
+        if item.url
+    }
     return list(unique.values())
 
 
-async def asyncio_gather_academic(max_results_per_query: int) -> tuple[list[CollectedItem], ...]:
+async def asyncio_gather_academic(max_results_per_query: int):
     import asyncio
 
     return await asyncio.gather(
@@ -282,4 +288,5 @@ async def asyncio_gather_academic(max_results_per_query: int) -> tuple[list[Coll
         collect_academic_rss(),
         collect_crossref(max_results_per_query=max_results_per_query),
         collect_semantic_scholar(max_results_per_query=max_results_per_query),
+        return_exceptions=True,
     )

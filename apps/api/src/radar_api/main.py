@@ -56,7 +56,7 @@ def latest_episode_share(session: Session = Depends(get_session)) -> dict:
     episode = session.query(Episode).order_by(Episode.created_at.desc()).first()
     if not episode:
         raise HTTPException(status_code=404, detail="Nenhum episodio encontrado")
-    episode_url = settings.public_app_url
+    episode_url = f"{settings.public_app_url}?date={episode.episode_date}"
     briefing_excerpt = episode.briefing_markdown[:6500]
     briefing_body = briefing_excerpt
     if not briefing_excerpt.lstrip().lower().startswith(("resumo executivo", "# resumo executivo")):
@@ -70,7 +70,8 @@ def latest_episode_share(session: Session = Depends(get_session)) -> dict:
         )
     text = (
         f"Bom dia. Seu Radar Tech IA de {format_date_br(episode.episode_date)} esta pronto.\n\n"
-        f"Resumo completo e fontes para validacao:\n{episode_url}\n\n"
+        f"Resumo, audio e fontes para validacao:\n{episode_url}\n\n"
+        f"Audio direto:\n{episode.audio_url or 'audio ainda nao disponivel'}\n\n"
         f"{cost_line}\n\n"
         f"{briefing_body}"
     )
