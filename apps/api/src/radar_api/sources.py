@@ -20,8 +20,7 @@ RSS_FEEDS = [
     },
     {
         "name": "TecMundo",
-        "url": "https://www.tecmundo.com.br/",
-        "parser": "html_listing",
+        "url": "https://news.google.com/rss/search?q=site%3Atecmundo.com.br%20tecnologia%20OR%20IA%20OR%20seguran%C3%A7a&hl=pt-BR&gl=BR&ceid=BR:pt-419",
         "type": "press_br",
         "category": "brasil_tecnologia",
     },
