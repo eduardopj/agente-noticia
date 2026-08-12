@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     openai_summary_model: str = "gpt-5-mini"
     openai_tts_model: str = "gpt-4o-mini-tts"
     openai_tts_voice_lia: str = "nova"
-    openai_tts_voice_bruno: str = "onyx"
+    openai_tts_voice_secondary: str = "onyx"
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None

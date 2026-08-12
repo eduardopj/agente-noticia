@@ -24,6 +24,14 @@ class EpisodeResponse(BaseModel):
     script_markdown: str | None = None
     audio_url: str | None = None
     whatsapp_status: str
+    summary_input_tokens: int = 0
+    summary_output_tokens: int = 0
+    script_input_tokens: int = 0
+    script_output_tokens: int = 0
+    tts_input_chars: int = 0
+    estimated_audio_minutes: float = 0
+    estimated_cost_usd: float = 0
+    cost_breakdown_json: str | None = None
 
     model_config = {"from_attributes": True}
 

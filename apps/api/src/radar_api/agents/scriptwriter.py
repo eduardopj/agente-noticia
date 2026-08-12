@@ -1,17 +1,19 @@
 from openai import OpenAI
 
+from radar_api.agents.costs import TextResult, usage_from_response
 from radar_api.config import get_settings
 
 
-def generate_script(briefing_markdown: str) -> str:
+def generate_script(briefing_markdown: str) -> TextResult:
     settings = get_settings()
     if not settings.openai_api_key:
-        return (
+        text = (
             "# Roteiro\n\n"
             "Lia: Hoje temos um radar com noticias tecnicas e artigos academicos sobre IA.\n\n"
-            "Bruno: O ponto central e validar as fontes antes de transformar novidade em decisao.\n\n"
+            "Goku: O ponto central e validar as fontes antes de transformar novidade em decisao.\n\n"
             "Lia: Configure a chave da OpenAI para gerar um roteiro completo em portugues do Brasil.\n"
         )
+        return TextResult(text=text)
 
     client = OpenAI(api_key=settings.openai_api_key)
     response = client.responses.create(
@@ -21,10 +23,12 @@ def generate_script(briefing_markdown: str) -> str:
                 "role": "system",
                 "content": (
                     "Voce escreve roteiros de podcast em portugues do Brasil. "
-                    "Os personagens sao Lia, pesquisadora de IA, e Bruno, desenvolvedor senior. "
+                    "Os personagens sao Lia, pesquisadora de IA, e Goku, desenvolvedor senior acreano. "
                     "Use apenas o briefing fornecido. Equilibre noticias brasileiras, panorama global, "
                     "videos/canais, IA aplicada, devtools e artigos academicos. "
                     "Preserve cautela academica sem transformar o roteiro em aula tecnica pesada. "
+                    "A conversa deve soar natural, de gente indo para o trabalho e comentando o dia, "
+                    "com leve cadencia brasileira do Norte/Acre, sem caricatura, sem girias forcadas. "
                     "Toda data e hora deve ser falada em portugues do Brasil."
                 ),
             },
@@ -36,10 +40,11 @@ def generate_script(briefing_markdown: str) -> str:
                     "videos relevantes e, por fim, papers academicos. "
                     "Explique papers em ingles em portugues do Brasil. "
                     "Nao leia URLs em voz alta. "
-                    "Escreva falas sempre no formato 'Lia:' e 'Bruno:' para permitir vozes separadas.\n\n"
+                    "Escreva falas sempre no formato 'Lia:' e 'Goku:' para permitir vozes separadas.\n\n"
                     f"{briefing_markdown}"
                 ),
             },
         ],
     )
-    return response.output_text
+    input_tokens, output_tokens = usage_from_response(response)
+    return TextResult(text=response.output_text, input_tokens=input_tokens, output_tokens=output_tokens)

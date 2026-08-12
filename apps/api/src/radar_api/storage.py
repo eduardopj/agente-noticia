@@ -44,6 +44,14 @@ def create_episode(
     script_markdown: str,
     audio_url: str | None,
     source_items: list[SourceItem],
+    summary_input_tokens: int = 0,
+    summary_output_tokens: int = 0,
+    script_input_tokens: int = 0,
+    script_output_tokens: int = 0,
+    tts_input_chars: int = 0,
+    estimated_audio_minutes: float = 0,
+    estimated_cost_usd: float = 0,
+    cost_breakdown_json: str | None = None,
 ) -> Episode:
     existing = session.query(Episode).filter(Episode.episode_date == episode_date).one_or_none()
     if existing:
@@ -52,6 +60,14 @@ def create_episode(
         existing.briefing_markdown = briefing_markdown
         existing.script_markdown = script_markdown
         existing.audio_url = audio_url
+        existing.summary_input_tokens = summary_input_tokens
+        existing.summary_output_tokens = summary_output_tokens
+        existing.script_input_tokens = script_input_tokens
+        existing.script_output_tokens = script_output_tokens
+        existing.tts_input_chars = tts_input_chars
+        existing.estimated_audio_minutes = estimated_audio_minutes
+        existing.estimated_cost_usd = estimated_cost_usd
+        existing.cost_breakdown_json = cost_breakdown_json
         existing.items.clear()
         episode = existing
     else:
@@ -62,6 +78,14 @@ def create_episode(
             briefing_markdown=briefing_markdown,
             script_markdown=script_markdown,
             audio_url=audio_url,
+            summary_input_tokens=summary_input_tokens,
+            summary_output_tokens=summary_output_tokens,
+            script_input_tokens=script_input_tokens,
+            script_output_tokens=script_output_tokens,
+            tts_input_chars=tts_input_chars,
+            estimated_audio_minutes=estimated_audio_minutes,
+            estimated_cost_usd=estimated_cost_usd,
+            cost_breakdown_json=cost_breakdown_json,
         )
         session.add(episode)
     session.flush()

@@ -20,16 +20,26 @@ def generate_audio(script: str, episode_date: str) -> str | None:
     with output_path.open("wb") as final_audio:
         for speaker, text in segments:
             voice = (
-                settings.openai_tts_voice_bruno
-                if speaker.lower().startswith("bruno")
+                settings.openai_tts_voice_secondary
+                if speaker.lower().startswith("goku")
                 else settings.openai_tts_voice_lia
             )
-            with client.audio.speech.with_streaming_response.create(
-                model=settings.openai_tts_model,
-                voice=voice,
-                input=text[:3500],
-                response_format="mp3",
-            ) as response:
+            speech_kwargs = {
+                "model": settings.openai_tts_model,
+                "voice": voice,
+                "input": text[:3500],
+                "instructions": (
+                    "Fale em portugues do Brasil de forma natural, conversada, calorosa e menos mecanica. "
+                    "Use ritmo de conversa cotidiana, com leve cadencia nortista/acreana, sem caricatura."
+                ),
+                "response_format": "mp3",
+            }
+            try:
+                response_context = client.audio.speech.with_streaming_response.create(**speech_kwargs)
+            except TypeError:
+                speech_kwargs.pop("instructions", None)
+                response_context = client.audio.speech.with_streaming_response.create(**speech_kwargs)
+            with response_context as response:
                 temp_path = output_dir / f".{episode_date}-{speaker}.part.mp3"
                 response.stream_to_file(temp_path)
                 final_audio.write(temp_path.read_bytes())
@@ -39,7 +49,7 @@ def generate_audio(script: str, episode_date: str) -> str | None:
 
 
 def _split_dialogue(script: str) -> list[tuple[str, str]]:
-    pattern = re.compile(r"^(Lia|Bruno)\s*:\s*(.+)$", re.IGNORECASE)
+    pattern = re.compile(r"^(Lia|Goku)\s*:\s*(.+)$", re.IGNORECASE)
     segments: list[tuple[str, str]] = []
     current_speaker = "Lia"
     current_lines: list[str] = []

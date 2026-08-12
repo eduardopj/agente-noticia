@@ -1,11 +1,12 @@
 from openai import OpenAI
 
+from radar_api.agents.costs import TextResult, usage_from_response
 from radar_api.config import get_settings
 from radar_api.schemas import CollectedItem
 from radar_api.utils.dates import format_date_br, today_local
 
 
-def build_fallback_briefing(items: list[CollectedItem]) -> tuple[str, str]:
+def build_fallback_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]:
     lines = [
         f"# Radar Tech IA Diario - {format_date_br(today_local())}",
         "",
@@ -26,10 +27,11 @@ def build_fallback_briefing(items: list[CollectedItem]) -> tuple[str, str]:
             ]
         )
     summary = "Radar diario com noticias e artigos academicos recentes sobre IA e tecnologia."
-    return summary, "\n".join(lines)
+    text = "\n".join(lines)
+    return summary, text, TextResult(text=text)
 
 
-def generate_briefing(items: list[CollectedItem]) -> tuple[str, str]:
+def generate_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]:
     settings = get_settings()
     if not settings.openai_api_key:
         return build_fallback_briefing(items)
@@ -84,4 +86,5 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str]:
     )
     text = response.output_text
     executive = text.split("\n", 1)[0].replace("#", "").strip() or "Radar Tech IA Diario"
-    return executive, text
+    input_tokens, output_tokens = usage_from_response(response)
+    return executive, text, TextResult(text=text, input_tokens=input_tokens, output_tokens=output_tokens)

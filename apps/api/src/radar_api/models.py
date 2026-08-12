@@ -39,6 +39,14 @@ class Episode(Base):
     script_markdown: Mapped[str | None] = mapped_column(Text, nullable=True)
     audio_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     whatsapp_status: Mapped[str] = mapped_column(String(40), default="not_sent")
+    summary_input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    summary_output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    script_input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    script_output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    tts_input_chars: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_audio_minutes: Mapped[float] = mapped_column(Float, default=0)
+    estimated_cost_usd: Mapped[float] = mapped_column(Float, default=0)
+    cost_breakdown_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     items: Mapped[list["EpisodeItem"]] = relationship(

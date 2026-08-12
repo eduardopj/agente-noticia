@@ -54,10 +54,16 @@ def latest_episode_share(session: Session = Depends(get_session)) -> dict:
     if not episode:
         raise HTTPException(status_code=404, detail="Nenhum episodio encontrado")
     episode_url = f"{settings.public_app_url}/?date={episode.episode_date}"
+    briefing_excerpt = episode.briefing_markdown[:6500]
+    cost_line = ""
+    if episode.estimated_cost_usd:
+        cost_line = f"\n\nCusto estimado deste briefing: US$ {episode.estimated_cost_usd:.4f}."
     text = (
         f"Bom dia. Seu Radar Tech IA de {format_date_br(episode.episode_date)} esta pronto.\n\n"
         f"{episode.executive_summary}\n\n"
+        f"{briefing_excerpt}\n\n"
         f"Resumo completo e fontes para validacao:\n{episode_url}"
+        f"{cost_line}"
     )
     return {
         "episode_id": episode.id,

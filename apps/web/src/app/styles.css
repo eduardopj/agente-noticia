@@ -129,6 +129,26 @@ h3 {
   font-size: 28px;
 }
 
+.costPanel {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px 16px;
+}
+
+.costPanel span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.costPanel strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .hero p {
   max-width: 840px;
   color: var(--muted);
@@ -201,6 +221,10 @@ pre {
   border-bottom: 1px solid var(--line);
   padding: 14px 18px;
   color: inherit;
+}
+
+.sourceItem a {
+  color: inherit;
   text-decoration: none;
 }
 
@@ -210,6 +234,28 @@ pre {
 
 .sourceItem strong {
   line-height: 1.35;
+}
+
+.validationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.validationActions button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.validationActions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 @media (max-width: 900px) {

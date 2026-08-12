@@ -1,3 +1,5 @@
+import { revalidatePath } from "next/cache";
+
 type Episode = {
   id: number;
   episode_date: string;
@@ -7,6 +9,13 @@ type Episode = {
   script_markdown: string | null;
   audio_url: string | null;
   whatsapp_status: string;
+  summary_input_tokens: number;
+  summary_output_tokens: number;
+  script_input_tokens: number;
+  script_output_tokens: number;
+  tts_input_chars: number;
+  estimated_audio_minutes: number;
+  estimated_cost_usd: number;
 };
 
 type Source = {
@@ -38,6 +47,19 @@ type Stats = {
 const apiUrl = process.env.API_BASE_URL || "http://localhost:8000";
 const timezone = process.env.TIMEZONE || "America/Rio_Branco";
 
+async function validateSource(formData: FormData) {
+  "use server";
+  const sourceId = formData.get("sourceId");
+  const status = formData.get("status");
+  if (!sourceId || !status) return;
+  await fetch(`${apiUrl}/sources/${sourceId}/validation`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  revalidatePath("/");
+}
+
 function formatDateBr(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
@@ -50,7 +72,7 @@ function formatDateBr(value: string) {
 
 async function fetchJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const response = await fetch(`${apiUrl}${path}`, { next: { revalidate: 60 } });
+    const response = await fetch(`${apiUrl}${path}`, { cache: "no-store" });
     if (!response.ok) return fallback;
     return response.json();
   } catch {
@@ -60,7 +82,9 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
 
 export default async function Home() {
   const episode = await fetchJson<Episode | null>("/episodes/latest", null);
-  const sources = await fetchJson<Source[]>("/sources", []);
+  const sources = episode
+    ? await fetchJson<Source[]>(`/episodes/${episode.id}/sources`, [])
+    : [];
   const stats = await fetchJson<Stats>("/stats", {
     episodes: 0,
     sources: 0,
@@ -75,36 +99,47 @@ export default async function Home() {
     <main>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Radar diário</p>
+          <p className="eyebrow">Radar diario</p>
           <h1>Tech IA</h1>
         </div>
         <div className="status">
           <span>WhatsApp</span>
-          <strong>{episode?.whatsapp_status === "sent" ? "enviado" : "pendente"}</strong>
+          <strong>{labelWhatsapp(episode?.whatsapp_status)}</strong>
         </div>
       </header>
 
       <section className="hero">
         <div>
-          <p className="date">{episode ? formatDateBr(episode.episode_date) : "Nenhum episódio gerado"}</p>
+          <p className="date">{episode ? formatDateBr(episode.episode_date) : "Nenhum episodio gerado"}</p>
           <h2>{episode?.title || "Aguardando o primeiro radar"}</h2>
-          <p>{episode?.executive_summary || "Execute o job diário para coletar notícias e artigos acadêmicos."}</p>
+          <p>{episode?.executive_summary || "Execute o job diario para coletar noticias e artigos academicos."}</p>
         </div>
         <div className="audioPanel">
-          <span>Áudio do dia</span>
+          <span>Audio do dia</span>
           {episode?.audio_url ? (
             <audio controls src={episode.audio_url} />
           ) : (
-            <p>Áudio ainda não gerado. Configure OPENAI_API_KEY para ativar TTS.</p>
+            <p>Audio ainda nao gerado. Configure OPENAI_API_KEY para ativar TTS.</p>
           )}
         </div>
       </section>
 
       <section className="statsGrid">
-        <StatCard label="Episódios" value={stats.episodes} />
+        <StatCard label="Episodios" value={stats.episodes} />
         <StatCard label="Fontes" value={stats.sources} />
-        <StatCard label="Acadêmicas" value={stats.academic_sources} />
-        <StatCard label="Validação pendente" value={stats.pending_validation} />
+        <StatCard label="Pendentes" value={stats.pending_validation} />
+        <StatCard label="Custo estimado" value={`US$ ${(episode?.estimated_cost_usd || 0).toFixed(4)}`} />
+      </section>
+
+      <section className="costPanel">
+        <span>Uso do episodio</span>
+        <strong>
+          Texto: {(episode?.summary_input_tokens || 0) + (episode?.script_input_tokens || 0)} tokens de entrada,
+          {" "}
+          {(episode?.summary_output_tokens || 0) + (episode?.script_output_tokens || 0)} de saida.
+          {" "}
+          Audio: {episode?.estimated_audio_minutes?.toFixed(1) || "0.0"} min estimados.
+        </strong>
       </section>
 
       <section className="grid">
@@ -113,21 +148,21 @@ export default async function Home() {
             <p className="eyebrow">Briefing</p>
             <h3>Resumo e contexto</h3>
           </div>
-          <pre>{episode?.briefing_markdown || "Sem briefing disponível."}</pre>
+          <pre>{episode?.briefing_markdown || "Sem briefing disponivel."}</pre>
         </article>
 
         <aside className="sources">
           <div className="sectionHeader">
-            <p className="eyebrow">Validação</p>
-            <h3>Fontes recentes</h3>
+            <p className="eyebrow">Validacao</p>
+            <h3>Fontes deste episodio</h3>
           </div>
           <div className="sourceList">
             {sources.length === 0 ? (
               <p className="empty">Nenhuma fonte coletada ainda.</p>
             ) : (
               <>
-                <SourceGroup title="Artigos acadêmicos" sources={academicSources.slice(0, 10)} />
-                <SourceGroup title="Notícias e tecnologia" sources={generalSources.slice(0, 10)} />
+                <SourceGroup title="Noticias e tecnologia" sources={generalSources} />
+                <SourceGroup title="Artigos academicos" sources={academicSources} />
               </>
             )}
           </div>
@@ -137,7 +172,7 @@ export default async function Home() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <div>
       <span>{label}</span>
@@ -152,25 +187,42 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
     <div className="sourceGroup">
       <h4>{title}</h4>
       {sources.map((source) => (
-        <a className="sourceItem" href={source.url} key={source.id} rel="noreferrer" target="_blank">
+        <div className="sourceItem" key={source.id}>
           <span>{source.source_name}</span>
-          <strong>{source.title}</strong>
+          <a href={source.url} rel="noreferrer" target="_blank">
+            <strong>{source.title}</strong>
+          </a>
           <small>
             {source.category} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
           </small>
           <small>Status: {labelValidation(source.validation_status)}</small>
-        </a>
+          <form action={validateSource} className="validationActions">
+            <input name="sourceId" type="hidden" value={source.id} />
+            <button name="status" type="submit" value="trusted">Confiavel</button>
+            <button name="status" type="submit" value="doubtful">Duvidosa</button>
+            <button name="status" type="submit" value="discarded">Descartar</button>
+          </form>
+        </div>
       ))}
     </div>
   );
 }
 
-function labelValidation(status: string) {
+function labelValidation(status?: string) {
   const labels: Record<string, string> = {
     pending: "pendente",
-    trusted: "confiável",
+    trusted: "confiavel",
     doubtful: "duvidosa",
     discarded: "descartada",
   };
-  return labels[status] || status;
+  return labels[status || "pending"] || status;
+}
+
+function labelWhatsapp(status?: string) {
+  const labels: Record<string, string> = {
+    sent: "texto e audio enviados",
+    sent_text_only: "texto enviado",
+    not_sent: "pendente",
+  };
+  return labels[status || "not_sent"] || status;
 }

@@ -3,7 +3,7 @@ Transforme o briefing diario em roteiro de podcast em portugues do Brasil.
 Personagens:
 
 - Lia: pesquisadora de IA, precisa, cuidadosa com evidencias e boa em traduzir pesquisa para pratica.
-- Bruno: desenvolvedor senior, pragmatico, curioso e atento ao impacto real no mercado, no ensino e no desenvolvimento de software.
+- Goku: desenvolvedor senior acreano, pragmatico, curioso e atento ao impacto real no mercado, no ensino e no desenvolvimento de software.
 
 Estrutura:
 

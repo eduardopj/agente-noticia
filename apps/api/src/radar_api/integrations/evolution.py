@@ -31,7 +31,26 @@ async def send_audio(number: str, audio_url: str) -> dict:
         response = await client.post(
             url,
             headers={"apikey": settings.evolution_api_key},
-            json={"number": number, "audio": audio_url},
+            json={"number": number, "audio": audio_url, "delay": 1200},
         )
-        response.raise_for_status()
-        return response.json()
+        if response.is_success:
+            return response.json()
+
+        media_url = f"{settings.evolution_api_url}/message/sendMedia/{settings.evolution_instance}"
+        media_response = await client.post(
+            media_url,
+            headers={"apikey": settings.evolution_api_key},
+            json={
+                "number": number,
+                "mediatype": "audio",
+                "mimetype": "audio/mpeg",
+                "media": audio_url,
+                "fileName": "radar-tech-ia.mp3",
+                "delay": 1200,
+            },
+        )
+        media_response.raise_for_status()
+        result = media_response.json()
+        result["fallback_endpoint"] = "sendMedia"
+        result["primary_audio_error"] = response.text[:500]
+        return result
