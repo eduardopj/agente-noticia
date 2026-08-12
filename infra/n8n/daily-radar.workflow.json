@@ -1,0 +1,57 @@
+{
+  "name": "Radar Tech IA Diario",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-daily",
+      "name": "Todo dia as 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.API_BASE_URL}}/jobs/daily-radar",
+        "sendBody": false
+      },
+      "id": "run-job",
+      "name": "Gerar radar diario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.API_BASE_URL}}/deliver/whatsapp/latest",
+        "sendBody": false
+      },
+      "id": "deliver-whatsapp",
+      "name": "Enviar via WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Todo dia as 07:00": {
+      "main": [[{ "node": "Gerar radar diario", "type": "main", "index": 0 }]]
+    },
+    "Gerar radar diario": {
+      "main": [[{ "node": "Enviar via WhatsApp", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "timezone": "America/Rio_Branco"
+  }
+}
