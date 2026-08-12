@@ -29,7 +29,7 @@ async def collect_rss(limit_per_feed: int = 5) -> list[CollectedItem]:
                 response.raise_for_status()
             except httpx.HTTPError:
                 continue
-            parsed = feedparser.parse(response.text)
+            parsed = feedparser.parse(response.content)
             for entry in parsed.entries[:limit_per_feed]:
                 items.append(
                     CollectedItem(

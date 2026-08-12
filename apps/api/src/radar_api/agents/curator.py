@@ -47,7 +47,21 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
         "fine-tuning",
     ]
     haystack = f"{item.title} {item.raw_summary or ''}".lower()
-    relevance = min(10.0, 5.0 + academic_boost + sum(0.6 for term in relevance_terms if term in haystack))
+    relevance = 5.0 + academic_boost + sum(0.6 for term in relevance_terms if term in haystack)
+    commerce_terms = [
+        "promocao",
+        "promoção",
+        "desconto",
+        "oferta",
+        "cupom",
+        "amazon",
+        "mercado livre",
+        "seleção de",
+        "selecao de",
+    ]
+    if any(term in haystack for term in commerce_terms):
+        relevance -= 4.0
+    relevance = max(0.0, min(10.0, relevance))
     novelty = 8.0 if item.published_at else 6.0
     return relevance, reliability, novelty
 
