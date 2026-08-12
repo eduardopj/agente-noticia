@@ -20,12 +20,15 @@ def _parse_date(value: str | None) -> datetime | None:
         return None
 
 
-async def collect_rss(limit_per_feed: int = 8) -> list[CollectedItem]:
+async def collect_rss(limit_per_feed: int = 5) -> list[CollectedItem]:
     items: list[CollectedItem] = []
     async with httpx.AsyncClient(timeout=20) as client:
         for feed in RSS_FEEDS:
-            response = await client.get(feed["url"])
-            response.raise_for_status()
+            try:
+                response = await client.get(feed["url"], follow_redirects=True)
+                response.raise_for_status()
+            except httpx.HTTPError:
+                continue
             parsed = feedparser.parse(response.text)
             for entry in parsed.entries[:limit_per_feed]:
                 items.append(
@@ -34,10 +37,13 @@ async def collect_rss(limit_per_feed: int = 8) -> list[CollectedItem]:
                         title=entry.get("title", "Sem titulo"),
                         source_name=feed["name"],
                         source_type=feed["type"],
-                        language="en",
+                        language=feed.get(
+                            "language",
+                            "pt-BR" if "brasil" in feed["category"] else "en",
+                        ),
                         category=feed["category"],
                         authors=[author.get("name", "") for author in entry.get("authors", [])],
-                        published_at=_parse_date(entry.get("published")),
+                        published_at=_parse_date(entry.get("published") or entry.get("updated")),
                         raw_summary=entry.get("summary"),
                     )
                 )

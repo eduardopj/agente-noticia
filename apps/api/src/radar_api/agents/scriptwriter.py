@@ -22,7 +22,9 @@ def generate_script(briefing_markdown: str) -> str:
                 "content": (
                     "Voce escreve roteiros de podcast em portugues do Brasil. "
                     "Os personagens sao Lia, pesquisadora de IA, e Bruno, desenvolvedor senior. "
-                    "Use apenas o briefing fornecido e preserve cautela academica. "
+                    "Use apenas o briefing fornecido. Equilibre noticias brasileiras, panorama global, "
+                    "videos/canais, IA aplicada, devtools e artigos academicos. "
+                    "Preserve cautela academica sem transformar o roteiro em aula tecnica pesada. "
                     "Toda data e hora deve ser falada em portugues do Brasil."
                 ),
             },
@@ -30,7 +32,8 @@ def generate_script(briefing_markdown: str) -> str:
                 "role": "user",
                 "content": (
                     "Transforme o briefing em uma conversa de 8 a 12 minutos. "
-                    "Inclua noticias gerais e artigos academicos. "
+                    "Comece pelas noticias mais importantes do Brasil e do mundo, depois IA/devtools, "
+                    "videos relevantes e, por fim, papers academicos. "
                     "Explique papers em ingles em portugues do Brasil. "
                     "Nao leia URLs em voz alta. "
                     "Escreva falas sempre no formato 'Lia:' e 'Bruno:' para permitir vozes separadas.\n\n"

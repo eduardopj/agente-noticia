@@ -16,7 +16,7 @@ from radar_api.utils.dates import format_date_br, today_local
 async def collect_all() -> list:
     rss_items, academic_items = await asyncio.gather(
         collect_rss(),
-        collect_arxiv(),
+        collect_arxiv(max_results_per_query=3),
     )
     unique = {item.url: item for item in [*rss_items, *academic_items]}
     return list(unique.values())
@@ -26,7 +26,7 @@ async def run_daily_pipeline(target_date: str | None = None):
     init_db()
     episode_date = target_date or today_local().isoformat()
     collected = await collect_all()
-    selected = select_top_items(collected, limit=12)
+    selected = select_top_items(collected, limit=18)
     executive, briefing = generate_briefing(selected)
     script = generate_script(briefing)
     audio_url = generate_audio(script, episode_date)

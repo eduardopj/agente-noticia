@@ -54,10 +54,12 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str]:
                 "role": "system",
                 "content": (
                     "Voce e um editor tecnico senior. Gere um briefing em portugues do Brasil, "
-                    "com fontes preservadas, foco academico e pratico para um professor/desenvolvedor. "
+                    "com fontes preservadas, foco em tecnologia, IA, desenvolvimento, ciencia aplicada, "
+                    "mercado, produtos, infraestrutura, seguranca e pesquisa academica. "
                     "Toda data e hora mencionada deve estar em portugues do Brasil. "
                     "Artigos academicos em ingles devem manter titulo original, autores e link, "
-                    "mas a explicacao deve ser em portugues claro e rigoroso."
+                    "mas a explicacao deve ser em portugues claro e rigoroso. "
+                    "Nao deixe os artigos academicos dominarem o briefing quando houver noticias relevantes."
                 ),
             },
             {
@@ -65,8 +67,14 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str]:
                 "content": (
                     f"Hoje e {format_date_br(today_local())}. "
                     "Crie um resumo executivo e um briefing em Markdown. "
-                    "Use esta estrutura: Resumo executivo, Noticias gerais, Artigos academicos, "
-                    "O que testar, O que estudar, O que acompanhar, Fontes para validacao. "
+                    "Comece com uma linha chamada 'Resumo executivo:' com 2 a 4 frases. "
+                    "Use esta estrutura: Resumo executivo, Brasil, Mundo, IA e devtools, "
+                    "Videos e canais, Artigos academicos, O que testar, O que estudar, "
+                    "O que acompanhar, Fontes para validacao. "
+                    "Em Brasil, priorize sites brasileiros e impacto local. "
+                    "Em Mundo, priorize tendencias globais, produtos, chips, seguranca, big techs e startups. "
+                    "Em Videos e canais, destaque videos novos quando forem relevantes. "
+                    "Em Artigos academicos, selecione no maximo 4 papers, salvo se o dia tiver pouca noticia. "
                     "Inclua links de validacao em cada item. "
                     "Nao invente impacto que a fonte nao sustente.\n\n"
                     f"Itens:\n{payload}"

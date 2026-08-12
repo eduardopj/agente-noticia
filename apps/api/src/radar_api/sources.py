@@ -1,15 +1,65 @@
 RSS_FEEDS = [
+    # Brasil - tecnologia, mercado, ciencia aplicada e cultura digital.
+    {
+        "name": "Canaltech",
+        "url": "https://canaltech.com.br/rss/",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "Tecnoblog",
+        "url": "https://tecnoblog.net/feed/",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "Olhar Digital",
+        "url": "https://olhardigital.com.br/feed/",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "TecMundo",
+        "url": "https://www.tecmundo.com.br/rss",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "G1 Tecnologia",
+        "url": "https://g1.globo.com/rss/g1/tecnologia/",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "Folha Tecnologia",
+        "url": "https://feeds.folha.uol.com.br/tec/rss091.xml",
+        "type": "press_br",
+        "category": "brasil_tecnologia",
+    },
+    {
+        "name": "Baguete",
+        "url": "https://www.baguete.com.br/rss.xml",
+        "type": "press_br",
+        "category": "brasil_negocios_tech",
+    },
+    # Fontes primarias de IA e desenvolvimento.
     {
         "name": "OpenAI Blog",
         "url": "https://openai.com/news/rss.xml",
         "type": "primary",
-        "category": "ia",
+        "category": "ia_global",
     },
     {
         "name": "Google DeepMind Blog",
         "url": "https://deepmind.google/blog/rss.xml",
         "type": "primary",
-        "category": "ia",
+        "category": "ia_global",
+    },
+    {
+        "name": "Google AI",
+        "url": "https://blog.google/technology/ai/rss/",
+        "type": "primary",
+        "category": "ia_global",
     },
     {
         "name": "Hugging Face Blog",
@@ -27,7 +77,87 @@ RSS_FEEDS = [
         "name": "MIT Technology Review AI",
         "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
         "type": "press",
-        "category": "ia",
+        "category": "ia_global",
+    },
+    # Mundo - tecnologia, startups, devtools, chips, seguranca e ciencia aplicada.
+    {
+        "name": "The Verge",
+        "url": "https://www.theverge.com/rss/index.xml",
+        "type": "press",
+        "category": "tecnologia_global",
+    },
+    {
+        "name": "TechCrunch",
+        "url": "https://techcrunch.com/feed/",
+        "type": "press",
+        "category": "tecnologia_global",
+    },
+    {
+        "name": "Ars Technica",
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "type": "press",
+        "category": "tecnologia_global",
+    },
+    {
+        "name": "Wired",
+        "url": "https://www.wired.com/feed/rss",
+        "type": "press",
+        "category": "tecnologia_global",
+    },
+    {
+        "name": "VentureBeat AI",
+        "url": "https://venturebeat.com/category/ai/feed/",
+        "type": "press",
+        "category": "ia_global",
+    },
+    {
+        "name": "NVIDIA Blog",
+        "url": "https://blogs.nvidia.com/feed/",
+        "type": "primary",
+        "category": "hardware_ia",
+    },
+    {
+        "name": "BleepingComputer",
+        "url": "https://www.bleepingcomputer.com/feed/",
+        "type": "press",
+        "category": "seguranca",
+    },
+    # YouTube via RSS oficial do YouTube.
+    {
+        "name": "YouTube - Codigo Fonte TV",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCFuIUoyHB12qpYa8Jpxoxow",
+        "type": "video",
+        "category": "video_brasil",
+    },
+    {
+        "name": "YouTube - Curso em Video",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCrWvhVmt0Qac3HgsjQK62FQ",
+        "type": "video",
+        "category": "video_brasil",
+    },
+    {
+        "name": "YouTube - Filipe Deschamps",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCU5JicSrEM5A63jkJ2QvGYw",
+        "type": "video",
+        "category": "video_brasil",
+    },
+    {
+        "name": "YouTube - Fireship",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA",
+        "type": "video",
+        "category": "video_global",
+    },
+    {
+        "name": "YouTube - Two Minute Papers",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg",
+        "type": "video",
+        "category": "video_global",
+    },
+    {
+        "name": "YouTube - Google Developers",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        "type": "video",
+        "category": "video_global",
     },
 ]
 

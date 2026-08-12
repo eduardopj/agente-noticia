@@ -13,6 +13,7 @@ node_modules/
 out/
 dist/
 npm-debug.log*
+*.tar.gz
 
 .DS_Store
 Thumbs.db
