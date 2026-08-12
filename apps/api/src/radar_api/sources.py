@@ -20,7 +20,8 @@ RSS_FEEDS = [
     },
     {
         "name": "TecMundo",
-        "url": "https://www.tecmundo.com.br/rss",
+        "url": "https://www.tecmundo.com.br/",
+        "parser": "html_listing",
         "type": "press_br",
         "category": "brasil_tecnologia",
     },
