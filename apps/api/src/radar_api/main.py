@@ -36,6 +36,7 @@ async def run_daily_radar() -> RunJobResponse:
         status="ok",
         episode_id=episode.id,
         episode_date=episode.episode_date,
+        episode_date_br=format_date_br(episode.episode_date),
         message="Episodio diario gerado com sucesso",
     )
 
@@ -53,7 +54,7 @@ def latest_episode_share(session: Session = Depends(get_session)) -> dict:
     episode = session.query(Episode).order_by(Episode.created_at.desc()).first()
     if not episode:
         raise HTTPException(status_code=404, detail="Nenhum episodio encontrado")
-    episode_url = f"{settings.public_app_url}/?date={episode.episode_date}"
+    episode_url = settings.public_app_url
     briefing_excerpt = episode.briefing_markdown[:6500]
     cost_line = ""
     if episode.estimated_cost_usd:

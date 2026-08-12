@@ -18,12 +18,15 @@ class CollectedItem(BaseModel):
 class EpisodeResponse(BaseModel):
     id: int
     episode_date: str
+    episode_date_br: str
+    episode_date_short_br: str
     title: str
     executive_summary: str
     briefing_markdown: str
     script_markdown: str | None = None
     audio_url: str | None = None
     whatsapp_status: str
+    created_at_br: str
     summary_input_tokens: int = 0
     summary_output_tokens: int = 0
     script_input_tokens: int = 0
@@ -40,6 +43,7 @@ class RunJobResponse(BaseModel):
     status: str
     episode_id: int
     episode_date: str
+    episode_date_br: str
     message: str
 
 
@@ -53,6 +57,8 @@ class SourceResponse(BaseModel):
     category: str
     authors: str | None = None
     published_at: datetime | None = None
+    published_at_br: str | None = None
+    collected_at_br: str
     raw_summary: str | None = None
     curated_summary: str | None = None
     impact: str | None = None

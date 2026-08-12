@@ -4,6 +4,7 @@ from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from radar_api.db import Base
+from radar_api.utils.dates import format_date_br, format_datetime_br, format_short_date_br
 
 
 class SourceItem(Base):
@@ -26,6 +27,14 @@ class SourceItem(Base):
     reliability_score: Mapped[float] = mapped_column(Float, default=0)
     novelty_score: Mapped[float] = mapped_column(Float, default=0)
     validation_status: Mapped[str] = mapped_column(String(40), default="pending")
+
+    @property
+    def published_at_br(self) -> str | None:
+        return format_datetime_br(self.published_at) if self.published_at else None
+
+    @property
+    def collected_at_br(self) -> str:
+        return format_datetime_br(self.collected_at)
 
 
 class Episode(Base):
@@ -53,6 +62,18 @@ class Episode(Base):
         back_populates="episode",
         cascade="all, delete-orphan",
     )
+
+    @property
+    def episode_date_br(self) -> str:
+        return format_date_br(self.episode_date)
+
+    @property
+    def episode_date_short_br(self) -> str:
+        return format_short_date_br(self.episode_date)
+
+    @property
+    def created_at_br(self) -> str:
+        return format_datetime_br(self.created_at)
 
 
 class EpisodeItem(Base):

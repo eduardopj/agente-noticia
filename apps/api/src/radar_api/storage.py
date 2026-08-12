@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from radar_api.agents.curator import heuristic_scores
 from radar_api.models import Episode, EpisodeItem, SourceItem
 from radar_api.schemas import CollectedItem
+from radar_api.utils.dates import format_datetime_br
 
 
 def upsert_source_items(session: Session, items: list[CollectedItem]) -> list[SourceItem]:
@@ -108,6 +109,7 @@ def source_to_export(record: SourceItem) -> dict:
         "category": record.category,
         "authors": record.authors,
         "published_at": record.published_at.isoformat() if record.published_at else None,
+        "published_at_br": format_datetime_br(record.published_at) if record.published_at else None,
         "raw_summary": record.raw_summary,
         "curated_summary": record.curated_summary,
         "impact": record.impact,

@@ -3,12 +3,15 @@ import { revalidatePath } from "next/cache";
 type Episode = {
   id: number;
   episode_date: string;
+  episode_date_br: string;
+  episode_date_short_br: string;
   title: string;
   executive_summary: string;
   briefing_markdown: string;
   script_markdown: string | null;
   audio_url: string | null;
   whatsapp_status: string;
+  created_at_br: string;
   summary_input_tokens: number;
   summary_output_tokens: number;
   script_input_tokens: number;
@@ -28,6 +31,8 @@ type Source = {
   category: string;
   authors: string | null;
   published_at: string | null;
+  published_at_br: string | null;
+  collected_at_br: string;
   raw_summary: string | null;
   curated_summary: string | null;
   impact: string | null;
@@ -45,7 +50,6 @@ type Stats = {
 };
 
 const apiUrl = process.env.API_BASE_URL || "http://localhost:8000";
-const timezone = process.env.TIMEZONE || "America/Rio_Branco";
 
 async function validateSource(formData: FormData) {
   "use server";
@@ -58,16 +62,6 @@ async function validateSource(formData: FormData) {
     body: JSON.stringify({ status }),
   });
   revalidatePath("/");
-}
-
-function formatDateBr(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: timezone,
-  }).format(new Date(`${value}T12:00:00`));
 }
 
 async function fetchJson<T>(path: string, fallback: T): Promise<T> {
@@ -110,7 +104,7 @@ export default async function Home() {
 
       <section className="hero">
         <div>
-          <p className="date">{episode ? formatDateBr(episode.episode_date) : "Nenhum episodio gerado"}</p>
+          <p className="date">{episode ? episode.episode_date_br : "Nenhum episodio gerado"}</p>
           <h2>{episode?.title || "Aguardando o primeiro radar"}</h2>
           <p>{episode?.executive_summary || "Execute o job diario para coletar noticias e artigos academicos."}</p>
         </div>
@@ -195,6 +189,7 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
           <small>
             {source.category} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
           </small>
+          {source.published_at_br ? <small>Publicado em: {source.published_at_br}</small> : null}
           <small>Status: {labelValidation(source.validation_status)}</small>
           <form action={validateSource} className="validationActions">
             <input name="sourceId" type="hidden" value={source.id} />

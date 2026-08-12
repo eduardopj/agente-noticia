@@ -5,18 +5,18 @@ from radar_api.config import get_settings
 
 WEEKDAYS = [
     "segunda-feira",
-    "terca-feira",
+    "terça-feira",
     "quarta-feira",
     "quinta-feira",
     "sexta-feira",
-    "sabado",
+    "sábado",
     "domingo",
 ]
 
 MONTHS = [
     "janeiro",
     "fevereiro",
-    "marco",
+    "março",
     "abril",
     "maio",
     "junho",
@@ -51,4 +51,14 @@ def format_date_br(value: date | datetime | str) -> str:
 
 def format_datetime_br(value: datetime) -> str:
     local = value.astimezone(app_timezone()) if value.tzinfo else value.replace(tzinfo=app_timezone())
-    return f"{format_date_br(local)}, as {local:%H:%M}"
+    return f"{format_date_br(local)}, às {local:%H:%M}"
+
+
+def format_short_date_br(value: date | datetime | str) -> str:
+    if isinstance(value, str):
+        parsed = date.fromisoformat(value)
+    elif isinstance(value, datetime):
+        parsed = value.astimezone(app_timezone()).date() if value.tzinfo else value.date()
+    else:
+        parsed = value
+    return parsed.strftime("%d/%m/%Y")
