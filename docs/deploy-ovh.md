@@ -5,8 +5,8 @@ Servidor:
 - SSH: configure em `RADAR_SSH_HOST`
 - Chave: configure em `RADAR_SSH_KEY`
 - Diretorio da aplicacao: `/opt/radar-tech-ia`
-- API interna: `127.0.0.1:4101`
-- Web interna: `127.0.0.1:4100`
+- API interna: `127.0.0.1:4211`
+- Web interna: `127.0.0.1:4210`
 - API publica: configure em `RADAR_API_URL`
 - Web publica: configure em `RADAR_WEB_URL`
 
@@ -86,7 +86,7 @@ sudo certbot --nginx -d api-radar.example.com -d radar.example.com
 ## Testes
 
 ```bash
-curl http://127.0.0.1:4101/health
+curl http://127.0.0.1:4211/health
 curl https://api-radar.example.com/health
 pm2 status
 ```

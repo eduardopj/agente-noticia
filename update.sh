@@ -5,8 +5,9 @@ SSH_HOST="${RADAR_SSH_HOST:?Set RADAR_SSH_HOST, for example ubuntu@server-ip}"
 SSH_KEY="${RADAR_SSH_KEY:-$HOME/.ssh/ovh-acp}"
 REMOTE_DIR="${RADAR_REMOTE_DIR:-/opt/radar-tech-ia}"
 ARCHIVE_NAME="radar-tech-ia.tar.gz"
-API_PORT="${RADAR_API_PORT:-4101}"
-WEB_PORT="${RADAR_WEB_PORT:-4100}"
+ARCHIVE_PATH="${TMPDIR:-/tmp}/$ARCHIVE_NAME"
+API_PORT="${RADAR_API_PORT:-4211}"
+WEB_PORT="${RADAR_WEB_PORT:-4210}"
 API_URL="${RADAR_API_URL:?Set RADAR_API_URL, for example https://api-radar.example.com}"
 WEB_URL="${RADAR_WEB_URL:?Set RADAR_WEB_URL, for example https://radar.example.com}"
 
@@ -27,10 +28,10 @@ tar \
   --exclude="apps/web/.next/cache" \
   --exclude="storage" \
   --exclude="radar.db" \
-  -czf "$ARCHIVE_NAME" .
+  -czf "$ARCHIVE_PATH" .
 
 echo "==> Uploading artifact to $SSH_HOST"
-scp -i "$SSH_KEY" "$ARCHIVE_NAME" "$SSH_HOST:/tmp/$ARCHIVE_NAME"
+scp -i "$SSH_KEY" "$ARCHIVE_PATH" "$SSH_HOST:/tmp/$ARCHIVE_NAME"
 
 echo "==> Installing on server"
 ssh -i "$SSH_KEY" "$SSH_HOST" bash -s <<EOF
@@ -60,7 +61,7 @@ pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
 EOF
 
-rm -f "$ARCHIVE_NAME"
+rm -f "$ARCHIVE_PATH"
 
 echo "==> Deploy finished"
 echo "API: $API_URL/health"
