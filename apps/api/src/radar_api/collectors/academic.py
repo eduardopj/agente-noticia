@@ -39,6 +39,7 @@ async def collect_arxiv(max_results_per_query: int = 5) -> list[CollectedItem]:
             root = ET.fromstring(response.text)
             for entry in root.findall("atom:entry", NS):
                 published = _text(entry, "atom:published")
+                updated = _text(entry, "atom:updated")
                 collected.append(
                     CollectedItem(
                         url=_text(entry, "atom:id") or "",
@@ -50,6 +51,9 @@ async def collect_arxiv(max_results_per_query: int = 5) -> list[CollectedItem]:
                         authors=_authors(entry),
                         published_at=datetime.fromisoformat(published.replace("Z", "+00:00")).replace(tzinfo=None)
                         if published
+                        else None,
+                        updated_at=datetime.fromisoformat(updated.replace("Z", "+00:00")).replace(tzinfo=None)
+                        if updated
                         else None,
                         raw_summary=(_text(entry, "atom:summary") or "").replace("\n", " "),
                     )

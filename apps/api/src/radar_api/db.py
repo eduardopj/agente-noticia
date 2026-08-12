@@ -21,6 +21,7 @@ def init_db() -> None:
 
     Base.metadata.create_all(bind=engine)
     _add_missing_episode_columns()
+    _add_missing_source_columns()
 
 
 def _add_missing_episode_columns() -> None:
@@ -42,6 +43,20 @@ def _add_missing_episode_columns() -> None:
         for name, definition in expected.items():
             if name not in columns:
                 connection.execute(text(f"ALTER TABLE episodes ADD COLUMN {name} {definition}"))
+
+
+def _add_missing_source_columns() -> None:
+    columns = {
+        column["name"]
+        for column in inspect(engine).get_columns("source_items")
+    }
+    expected = {
+        "updated_at": "DATETIME",
+    }
+    with engine.begin() as connection:
+        for name, definition in expected.items():
+            if name not in columns:
+                connection.execute(text(f"ALTER TABLE source_items ADD COLUMN {name} {definition}"))
 
 
 def get_session() -> Generator[Session, None, None]:

@@ -25,7 +25,7 @@ def generate_audio(script: str, episode_date: str) -> str | None:
         for speaker, text in segments:
             voice = (
                 settings.openai_tts_voice_secondary
-                if speaker.lower().startswith("goku")
+                if speaker.lower().startswith("bit")
                 else settings.openai_tts_voice_lia
             )
             for chunk in _chunk_text(text):
@@ -57,7 +57,7 @@ def generate_audio(script: str, episode_date: str) -> str | None:
 
 
 def _split_dialogue(script: str) -> list[tuple[str, str]]:
-    pattern = re.compile(r"^(Lia|Goku)\s*:\s*(.+)$", re.IGNORECASE)
+    pattern = re.compile(r"^(Lia|Bit)\s*:\s*(.+)$", re.IGNORECASE)
     segments: list[tuple[str, str]] = []
     current_speaker = "Lia"
     current_lines: list[str] = []

@@ -3,7 +3,7 @@ from openai import OpenAI
 from radar_api.agents.costs import TextResult, usage_from_response
 from radar_api.config import get_settings
 from radar_api.schemas import CollectedItem
-from radar_api.utils.dates import format_date_br, today_local
+from radar_api.utils.dates import format_date_br, format_datetime_br, today_local
 
 
 def build_fallback_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]:
@@ -22,6 +22,8 @@ def build_fallback_briefing(items: list[CollectedItem]) -> tuple[str, str, TextR
                 f"### {index}. {item.title}",
                 f"- Fonte: {item.source_name} ({item.source_type})",
                 f"- Autores: {authors}",
+                f"- Publicado em: {format_datetime_br(item.published_at) if item.published_at else 'data nao informada'}",
+                f"- Atualizado em: {format_datetime_br(item.updated_at) if item.updated_at else 'atualizacao nao informada'}",
                 f"- Link: {item.url}",
                 f"- Resumo base: {item.raw_summary or 'sem resumo disponivel'}",
             ]
@@ -45,6 +47,8 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]
             "source_type": item.source_type,
             "category": item.category,
             "authors": item.authors,
+            "published_at": format_datetime_br(item.published_at) if item.published_at else None,
+            "updated_at": format_datetime_br(item.updated_at) if item.updated_at else None,
             "summary": item.raw_summary,
         }
         for item in items
@@ -78,6 +82,7 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]
                     "Em Videos e canais, destaque videos novos quando forem relevantes. "
                     "Em Artigos academicos, selecione no maximo 4 papers, salvo se o dia tiver pouca noticia. "
                     "Inclua links de validacao em cada item. "
+                    "Quando houver data de publicacao ou atualizacao, cite em portugues do Brasil. "
                     "Nao invente impacto que a fonte nao sustente.\n\n"
                     f"Itens:\n{payload}"
                 ),

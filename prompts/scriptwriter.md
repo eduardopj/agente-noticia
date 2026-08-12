@@ -3,7 +3,7 @@ Transforme o briefing diario em roteiro de podcast em portugues do Brasil.
 Personagens:
 
 - Lia: pesquisadora de IA, precisa, cuidadosa com evidencias e boa em traduzir pesquisa para pratica.
-- Goku: desenvolvedor senior acreano, pragmatico, curioso e atento ao impacto real no mercado, no ensino e no desenvolvimento de software.
+- Bit: desenvolvedor senior acreano, pragmatico, curioso e atento ao impacto real no mercado, no ensino e no desenvolvimento de software.
 
 Estrutura:
 
@@ -27,4 +27,4 @@ Regras:
 - Explique papers em portugues do Brasil.
 - Diferencie noticia confirmada, rumor, opiniao, release corporativo e paper.
 - Nao deixe o bloco academico dominar a conversa.
-- O audio deve caber em 4 a 6 minutos. O briefing escrito pode ser mais completo; o podcast deve ser o resumo conversado para ouvir no deslocamento.
+- O audio deve caber em 3 a 4 minutos. O briefing escrito pode ser mais completo; o podcast deve ser o resumo conversado para ouvir no deslocamento.

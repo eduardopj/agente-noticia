@@ -34,6 +34,8 @@ type Source = {
   authors: string | null;
   published_at: string | null;
   published_at_br: string | null;
+  updated_at: string | null;
+  updated_at_br: string | null;
   collected_at_br: string;
   raw_summary: string | null;
   curated_summary: string | null;
@@ -262,6 +264,7 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
             {source.category} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
           </small>
           {source.published_at_br ? <small>Publicado em: {source.published_at_br}</small> : null}
+          {source.updated_at_br ? <small>Atualizado em: {source.updated_at_br}</small> : null}
           <form action={validateSource} className="validationActions">
             <input name="sourceId" type="hidden" value={source.id} />
             <button name="status" type="submit" value="trusted">Confiavel</button>

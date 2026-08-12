@@ -13,6 +13,15 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
     }.get(item.source_type, 5.0)
 
     academic_boost = 0.5 if item.category == "academico" else 0.0
+    preferred_sources = [
+        "tecmundo",
+        "fabio akita",
+        "gustavo guanabara",
+        "curso em video",
+        "mano deyvin",
+        "filipe deschamps",
+    ]
+    source_boost = 1.0 if any(source in item.source_name.lower() for source in preferred_sources) else 0.0
     relevance_terms = [
         "ia",
         "inteligencia artificial",
@@ -47,7 +56,7 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
         "fine-tuning",
     ]
     haystack = f"{item.title} {item.raw_summary or ''}".lower()
-    relevance = 5.0 + academic_boost + sum(0.6 for term in relevance_terms if term in haystack)
+    relevance = 5.0 + academic_boost + source_boost + sum(0.6 for term in relevance_terms if term in haystack)
     commerce_terms = [
         "promocao",
         "promoção",

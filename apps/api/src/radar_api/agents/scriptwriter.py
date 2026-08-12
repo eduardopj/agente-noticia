@@ -10,7 +10,7 @@ def generate_script(briefing_markdown: str) -> TextResult:
         text = (
             "# Roteiro\n\n"
             "Lia: Hoje temos um radar com noticias tecnicas e artigos academicos sobre IA.\n\n"
-            "Goku: O ponto central e validar as fontes antes de transformar novidade em decisao.\n\n"
+            "Bit: O ponto central e validar as fontes antes de transformar novidade em decisao.\n\n"
             "Lia: Configure a chave da OpenAI para gerar um roteiro completo em portugues do Brasil.\n"
         )
         return TextResult(text=text)
@@ -23,7 +23,7 @@ def generate_script(briefing_markdown: str) -> TextResult:
                 "role": "system",
                 "content": (
                     "Voce escreve roteiros de podcast em portugues do Brasil. "
-                    "Os personagens sao Lia, pesquisadora de IA, e Goku, desenvolvedor senior acreano. "
+                    "Os personagens sao Lia, pesquisadora de IA, e Bit, desenvolvedor senior acreano. "
                     "Use apenas o briefing fornecido. Equilibre noticias brasileiras, panorama global, "
                     "videos/canais, IA aplicada, devtools e artigos academicos. "
                     "Preserve cautela academica sem transformar o roteiro em aula tecnica pesada. "
@@ -35,13 +35,13 @@ def generate_script(briefing_markdown: str) -> TextResult:
             {
                 "role": "user",
                 "content": (
-                    "Transforme o briefing em uma conversa de 4 a 6 minutos, objetiva e informativa. "
+                    "Transforme o briefing em uma conversa de 3 a 4 minutos, objetiva e informativa. "
                     "Comece pelas noticias mais importantes do Brasil e do mundo, depois IA/devtools, "
                     "videos relevantes e, por fim, papers academicos. "
                     "Priorize o que muda decisao, aula, estudo ou desenvolvimento; corte detalhes secundarios. "
                     "Explique papers em ingles em portugues do Brasil. "
                     "Nao leia URLs em voz alta. "
-                    "Escreva falas sempre no formato 'Lia:' e 'Goku:' para permitir vozes separadas.\n\n"
+                    "Escreva falas sempre no formato 'Lia:' e 'Bit:' para permitir vozes separadas.\n\n"
                     f"{briefing_markdown}"
                 ),
             },

@@ -12,6 +12,18 @@ def upsert_source_items(session: Session, items: list[CollectedItem]) -> list[So
         existing = session.query(SourceItem).filter(SourceItem.url == item.url).one_or_none()
         relevance, reliability, novelty = heuristic_scores(item)
         if existing:
+            existing.title = item.title
+            existing.source_name = item.source_name
+            existing.source_type = item.source_type
+            existing.language = item.language
+            existing.category = item.category
+            existing.authors = ", ".join(item.authors)
+            existing.published_at = item.published_at or existing.published_at
+            existing.updated_at = item.updated_at or existing.updated_at
+            existing.raw_summary = item.raw_summary or existing.raw_summary
+            existing.relevance_score = relevance
+            existing.reliability_score = reliability
+            existing.novelty_score = novelty
             saved.append(existing)
             continue
         record = SourceItem(
@@ -23,6 +35,7 @@ def upsert_source_items(session: Session, items: list[CollectedItem]) -> list[So
             category=item.category,
             authors=", ".join(item.authors),
             published_at=item.published_at,
+            updated_at=item.updated_at,
             raw_summary=item.raw_summary,
             relevance_score=relevance,
             reliability_score=reliability,
@@ -110,6 +123,8 @@ def source_to_export(record: SourceItem) -> dict:
         "authors": record.authors,
         "published_at": record.published_at.isoformat() if record.published_at else None,
         "published_at_br": format_datetime_br(record.published_at) if record.published_at else None,
+        "updated_at": record.updated_at.isoformat() if record.updated_at else None,
+        "updated_at_br": format_datetime_br(record.updated_at) if record.updated_at else None,
         "raw_summary": record.raw_summary,
         "curated_summary": record.curated_summary,
         "impact": record.impact,

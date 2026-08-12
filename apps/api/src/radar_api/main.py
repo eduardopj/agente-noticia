@@ -194,20 +194,30 @@ async def deliver_latest_whatsapp(session: Session = Depends(get_session)) -> di
     audio_error = None
     audio_results = []
     if episode.audio_url:
-        audio_urls = public_whatsapp_audio_urls(episode.episode_date)
-        for index, audio_url in enumerate(audio_urls, start=1):
-            try:
-                if len(audio_urls) > 1:
-                    await send_text(
-                        settings.whatsapp_target_number,
-                        f"Audio do Radar Tech IA - parte {index}/{len(audio_urls)}",
-                    )
-                audio_result = await send_audio(settings.whatsapp_target_number, audio_url)
-                audio_results.append(audio_result)
-            except Exception as exc:  # noqa: BLE001
-                audio_error = str(exc)
-                logger.exception("Falha ao enviar audio do episodio %s parte %s", episode.id, index)
-                break
+        try:
+            audio_result = await send_audio(settings.whatsapp_target_number, episode.audio_url)
+            audio_results.append(audio_result)
+        except Exception as exc:  # noqa: BLE001
+            audio_error = str(exc)
+            logger.exception("Falha ao enviar audio unico do episodio %s", episode.id)
+
+        if not audio_result:
+            audio_urls = public_whatsapp_audio_urls(episode.episode_date)
+            part_urls = [audio_url for audio_url in audio_urls if audio_url != episode.audio_url]
+            if part_urls:
+                audio_error = None
+                await send_text(
+                    settings.whatsapp_target_number,
+                    f"O audio unico ficou pesado. Vou mandar em {len(part_urls)} partes curtas.",
+                )
+            for index, audio_url in enumerate(part_urls, start=1):
+                try:
+                    audio_result = await send_audio(settings.whatsapp_target_number, audio_url)
+                    audio_results.append(audio_result)
+                except Exception as exc:  # noqa: BLE001
+                    audio_error = str(exc)
+                    logger.exception("Falha ao enviar audio do episodio %s parte %s", episode.id, index)
+                    break
 
     episode.whatsapp_status = "sent" if not audio_error else "sent_text_only"
     session.commit()

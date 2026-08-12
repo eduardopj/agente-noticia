@@ -130,14 +130,26 @@ RSS_FEEDS = [
         "category": "video_brasil",
     },
     {
-        "name": "YouTube - Curso em Video",
+        "name": "YouTube - Gustavo Guanabara / Curso em Video",
         "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCrWvhVmt0Qac3HgsjQK62FQ",
+        "type": "video",
+        "category": "video_brasil",
+    },
+    {
+        "name": "YouTube - Fabio Akita",
+        "youtube_handle": "Akitando",
         "type": "video",
         "category": "video_brasil",
     },
     {
         "name": "YouTube - Filipe Deschamps",
         "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCU5JicSrEM5A63jkJ2QvGYw",
+        "type": "video",
+        "category": "video_brasil",
+    },
+    {
+        "name": "YouTube - Mano Deyvin",
+        "youtube_handle": "manodeyvin",
         "type": "video",
         "category": "video_brasil",
     },

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from radar_api.agents.audio import generate_audio
@@ -13,7 +14,7 @@ from radar_api.config import get_settings
 from radar_api.db import SessionLocal, init_db
 from radar_api.models import Episode, EpisodeItem, SourceItem
 from radar_api.storage import create_episode, source_to_export, upsert_source_items
-from radar_api.utils.dates import format_date_br, today_local
+from radar_api.utils.dates import app_timezone, format_date_br, today_local
 
 
 async def collect_all() -> list:
@@ -29,6 +30,7 @@ async def run_daily_pipeline(target_date: str | None = None):
     init_db()
     episode_date = target_date or today_local().isoformat()
     collected = await collect_all()
+    collected = filter_recent_items(collected, days=7)
     with SessionLocal() as session:
         filtered = filter_previously_used(session, collected, episode_date)
     selected = select_top_items(filtered, limit=18)
@@ -101,6 +103,27 @@ def filter_previously_used(session, items: list, episode_date: str) -> list:
             continue
         fresh.append(item)
     return fresh
+
+
+def filter_recent_items(items: list, days: int = 7) -> list:
+    now = datetime.now(app_timezone())
+    since = now - timedelta(days=days)
+    recent = []
+    for item in items:
+        source_time = item.published_at or item.updated_at
+        if not source_time:
+            recent.append(item)
+            continue
+        local_time = _as_local(source_time)
+        if since <= local_time <= now:
+            recent.append(item)
+    return recent
+
+
+def _as_local(value: datetime) -> datetime:
+    if value.tzinfo:
+        return value.astimezone(app_timezone())
+    return value.replace(tzinfo=timezone.utc).astimezone(app_timezone())
 
 
 def _normalize_title(title: str) -> str:

@@ -20,6 +20,7 @@ class SourceItem(Base):
     category: Mapped[str] = mapped_column(String(80), default="uncategorized")
     authors: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     collected_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     raw_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     curated_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -32,6 +33,10 @@ class SourceItem(Base):
     @property
     def published_at_br(self) -> str | None:
         return format_datetime_br(self.published_at) if self.published_at else None
+
+    @property
+    def updated_at_br(self) -> str | None:
+        return format_datetime_br(self.updated_at) if self.updated_at else None
 
     @property
     def collected_at_br(self) -> str:

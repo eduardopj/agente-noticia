@@ -12,6 +12,7 @@ class CollectedItem(BaseModel):
     category: str = "uncategorized"
     authors: list[str] = Field(default_factory=list)
     published_at: datetime | None = None
+    updated_at: datetime | None = None
     raw_summary: str | None = None
 
 
@@ -59,6 +60,8 @@ class SourceResponse(BaseModel):
     authors: str | None = None
     published_at: datetime | None = None
     published_at_br: str | None = None
+    updated_at: datetime | None = None
+    updated_at_br: str | None = None
     collected_at_br: str
     raw_summary: str | None = None
     curated_summary: str | None = None

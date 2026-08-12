@@ -33,15 +33,15 @@ Explica por que a noticia ou artigo importa para:
 
 ## Roteirista
 
-Transforma o briefing em conversa entre Lia e Goku.
+Transforma o briefing em conversa entre Lia e Bit.
 
 ## Audio
 
-Gera MP3 com vozes diferentes para Lia e Goku quando o roteiro estiver marcado como:
+Gera MP3 com vozes diferentes para Lia e Bit quando o roteiro estiver marcado como:
 
 ```text
 Lia: fala da Lia
-Goku: fala do Goku
+Bit: fala do Bit
 ```
 
 ## Entregador
