@@ -2,6 +2,8 @@ import httpx
 
 from radar_api.config import get_settings
 
+EVOLUTION_TIMEOUT = httpx.Timeout(connect=30, read=180, write=30, pool=30)
+
 
 async def send_text(number: str, text: str) -> dict:
     settings = get_settings()
@@ -9,7 +11,7 @@ async def send_text(number: str, text: str) -> dict:
         raise RuntimeError("Evolution API nao configurada")
 
     url = f"{settings.evolution_api_url}/message/sendText/{settings.evolution_instance}"
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=EVOLUTION_TIMEOUT) as client:
         response = await client.post(
             url,
             headers={"apikey": settings.evolution_api_key},
@@ -25,7 +27,7 @@ async def send_audio(number: str, audio_url: str) -> dict:
         raise RuntimeError("Evolution API nao configurada")
 
     url = f"{settings.evolution_api_url}/message/sendWhatsAppAudio/{settings.evolution_instance}"
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=EVOLUTION_TIMEOUT) as client:
         response = await client.post(
             url,
             headers={"apikey": settings.evolution_api_key},

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -15,6 +16,7 @@ from radar_api.utils.dates import format_date_br
 settings = get_settings()
 app = FastAPI(title=settings.app_name)
 app.mount("/static", StaticFiles(directory=settings.storage_dir), name="static")
+logger = logging.getLogger(__name__)
 
 
 @app.on_event("startup")
@@ -150,17 +152,23 @@ async def deliver_latest_whatsapp(session: Session = Depends(get_session)) -> di
     share = latest_episode_share(session)
     text_result = await send_text(settings.whatsapp_target_number, share["text"])
     audio_result = None
+    audio_error = None
     if episode.audio_url:
-        audio_result = await send_audio(settings.whatsapp_target_number, episode.audio_url)
+        try:
+            audio_result = await send_audio(settings.whatsapp_target_number, episode.audio_url)
+        except Exception as exc:  # noqa: BLE001
+            audio_error = str(exc)
+            logger.exception("Falha ao enviar audio do episodio %s", episode.id)
 
-    episode.whatsapp_status = "sent"
+    episode.whatsapp_status = "sent" if not audio_error else "sent_text_only"
     session.commit()
     return {
-        "status": "sent",
+        "status": episode.whatsapp_status,
         "episode_id": episode.id,
         "sent_audio": bool(audio_result),
         "text_result": text_result,
         "audio_result": audio_result,
+        "audio_error": audio_error,
     }
 
 
