@@ -6,12 +6,14 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from radar_api.agents import run_daily_pipeline
+from radar_api.agents.audio import public_whatsapp_audio_urls
 from radar_api.config import get_settings
 from radar_api.db import get_session, init_db
 from radar_api.integrations.evolution import send_audio, send_text
 from radar_api.models import Episode, EpisodeItem, SourceItem
-from radar_api.schemas import EpisodeResponse, RunJobResponse, SourceResponse, ValidationUpdate
+from radar_api.schemas import BulkValidationUpdate, EpisodeResponse, RunJobResponse, SourceResponse, ValidationUpdate
 from radar_api.utils.dates import format_date_br
+from radar_api.utils.money import format_brl, format_usd
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name)
@@ -56,15 +58,19 @@ def latest_episode_share(session: Session = Depends(get_session)) -> dict:
         raise HTTPException(status_code=404, detail="Nenhum episodio encontrado")
     episode_url = settings.public_app_url
     briefing_excerpt = episode.briefing_markdown[:6500]
-    cost_line = ""
+    cost_line = "Custo estimado deste briefing: nao calculado."
     if episode.estimated_cost_usd:
-        cost_line = f"\n\nCusto estimado deste briefing: US$ {episode.estimated_cost_usd:.4f}."
+        cost_line = (
+            "Custo estimado deste briefing: "
+            f"{format_usd(episode.estimated_cost_usd)} "
+            f"(aprox. {format_brl(episode.estimated_cost_brl)})."
+        )
     text = (
         f"Bom dia. Seu Radar Tech IA de {format_date_br(episode.episode_date)} esta pronto.\n\n"
+        f"Resumo completo e fontes para validacao:\n{episode_url}\n\n"
+        f"{cost_line}\n\n"
         f"{episode.executive_summary}\n\n"
-        f"{briefing_excerpt}\n\n"
-        f"Resumo completo e fontes para validacao:\n{episode_url}"
-        f"{cost_line}"
+        f"{briefing_excerpt}"
     )
     return {
         "episode_id": episode.id,
@@ -126,6 +132,30 @@ def update_source_validation(
     return source
 
 
+@app.post("/episodes/{episode_id}/sources/validation")
+def update_episode_sources_validation(
+    episode_id: int,
+    payload: BulkValidationUpdate,
+    session: Session = Depends(get_session),
+) -> dict:
+    allowed = {"pending", "trusted", "doubtful", "discarded"}
+    if payload.status not in allowed:
+        raise HTTPException(status_code=400, detail="Status de validacao invalido")
+    episode = session.get(Episode, episode_id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episodio nao encontrado")
+    rows = (
+        session.query(SourceItem)
+        .join(EpisodeItem, EpisodeItem.source_item_id == SourceItem.id)
+        .filter(EpisodeItem.episode_id == episode_id)
+        .all()
+    )
+    for source in rows:
+        source.validation_status = payload.status
+    session.commit()
+    return {"status": "ok", "updated": len(rows)}
+
+
 @app.get("/stats")
 def stats(session: Session = Depends(get_session)) -> dict:
     return {
@@ -160,12 +190,22 @@ async def deliver_latest_whatsapp(session: Session = Depends(get_session)) -> di
     text_result = await send_text(settings.whatsapp_target_number, share["text"])
     audio_result = None
     audio_error = None
+    audio_results = []
     if episode.audio_url:
-        try:
-            audio_result = await send_audio(settings.whatsapp_target_number, episode.audio_url)
-        except Exception as exc:  # noqa: BLE001
-            audio_error = str(exc)
-            logger.exception("Falha ao enviar audio do episodio %s", episode.id)
+        audio_urls = public_whatsapp_audio_urls(episode.episode_date)
+        for index, audio_url in enumerate(audio_urls, start=1):
+            try:
+                if len(audio_urls) > 1:
+                    await send_text(
+                        settings.whatsapp_target_number,
+                        f"Audio do Radar Tech IA - parte {index}/{len(audio_urls)}",
+                    )
+                audio_result = await send_audio(settings.whatsapp_target_number, audio_url)
+                audio_results.append(audio_result)
+            except Exception as exc:  # noqa: BLE001
+                audio_error = str(exc)
+                logger.exception("Falha ao enviar audio do episodio %s parte %s", episode.id, index)
+                break
 
     episode.whatsapp_status = "sent" if not audio_error else "sent_text_only"
     session.commit()
@@ -175,6 +215,7 @@ async def deliver_latest_whatsapp(session: Session = Depends(get_session)) -> di
         "sent_audio": bool(audio_result),
         "text_result": text_result,
         "audio_result": audio_result,
+        "audio_results": audio_results,
         "audio_error": audio_error,
     }
 

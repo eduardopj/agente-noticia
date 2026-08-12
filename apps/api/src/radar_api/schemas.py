@@ -34,6 +34,7 @@ class EpisodeResponse(BaseModel):
     tts_input_chars: int = 0
     estimated_audio_minutes: float = 0
     estimated_cost_usd: float = 0
+    estimated_cost_brl: float = 0
     cost_breakdown_json: str | None = None
 
     model_config = {"from_attributes": True}
@@ -71,4 +72,8 @@ class SourceResponse(BaseModel):
 
 
 class ValidationUpdate(BaseModel):
+    status: str
+
+
+class BulkValidationUpdate(BaseModel):
     status: str

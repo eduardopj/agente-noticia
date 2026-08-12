@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from radar_api.db import Base
 from radar_api.utils.dates import format_date_br, format_datetime_br, format_short_date_br
+from radar_api.utils.money import estimated_brl_from_usd
 
 
 class SourceItem(Base):
@@ -74,6 +75,10 @@ class Episode(Base):
     @property
     def created_at_br(self) -> str:
         return format_datetime_br(self.created_at)
+
+    @property
+    def estimated_cost_brl(self) -> float:
+        return estimated_brl_from_usd(self.estimated_cost_usd)
 
 
 class EpisodeItem(Base):

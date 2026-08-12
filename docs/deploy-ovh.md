@@ -55,6 +55,7 @@ API_BASE_URL=https://api-radar.example.com
 DATABASE_URL=sqlite:////opt/radar-tech-ia/radar.db
 STORAGE_DIR=/opt/radar-tech-ia/storage
 TIMEZONE=America/Rio_Branco
+USD_BRL_RATE=5.50
 OPENAI_API_KEY=
 OPENAI_SUMMARY_MODEL=gpt-5-mini
 OPENAI_TTS_MODEL=gpt-4o-mini-tts

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     openai_tts_model: str = "gpt-4o-mini-tts"
     openai_tts_voice_lia: str = "nova"
     openai_tts_voice_secondary: str = "onyx"
+    usd_brl_rate: float = 5.50
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None

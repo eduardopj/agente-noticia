@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 
 type Episode = {
@@ -19,6 +20,7 @@ type Episode = {
   tts_input_chars: number;
   estimated_audio_minutes: number;
   estimated_cost_usd: number;
+  estimated_cost_brl: number;
 };
 
 type Source = {
@@ -64,6 +66,19 @@ async function validateSource(formData: FormData) {
   revalidatePath("/");
 }
 
+async function validateEpisodeSources(formData: FormData) {
+  "use server";
+  const episodeId = formData.get("episodeId");
+  const status = formData.get("status");
+  if (!episodeId || !status) return;
+  await fetch(`${apiUrl}/episodes/${episodeId}/sources/validation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  revalidatePath("/");
+}
+
 async function fetchJson<T>(path: string, fallback: T): Promise<T> {
   try {
     const response = await fetch(`${apiUrl}${path}`, { cache: "no-store" });
@@ -74,10 +89,20 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
-export default async function Home() {
-  const episode = await fetchJson<Episode | null>("/episodes/latest", null);
-  const sources = episode
-    ? await fetchJson<Source[]>(`/episodes/${episode.id}/sources`, [])
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ date?: string }>;
+}) {
+  const params = await searchParams;
+  const episodes = await fetchJson<Episode[]>("/episodes", []);
+  const selectedDate = params?.date;
+  const episode = selectedDate
+    ? await fetchJson<Episode | null>(`/episodes/${selectedDate}`, null)
+    : await fetchJson<Episode | null>("/episodes/latest", null);
+  const activeEpisode = episode || episodes[0] || null;
+  const sources = activeEpisode
+    ? await fetchJson<Source[]>(`/episodes/${activeEpisode.id}/sources`, [])
     : [];
   const stats = await fetchJson<Stats>("/stats", {
     episodes: 0,
@@ -88,52 +113,88 @@ export default async function Home() {
 
   const academicSources = sources.filter((source) => source.category === "academico");
   const generalSources = sources.filter((source) => source.category !== "academico");
+  const pendingInEpisode = sources.filter((source) => source.validation_status === "pending").length;
 
   return (
     <main>
-      <header className="topbar">
+      <header className="shellHeader">
         <div>
           <p className="eyebrow">Radar diario</p>
           <h1>Tech IA</h1>
+          <p className="subtitle">Noticias, IA, tecnologia global, videos e pesquisa academica em um painel unico.</p>
         </div>
-        <div className="status">
+        <div className="liveBadge">
           <span>WhatsApp</span>
-          <strong>{labelWhatsapp(episode?.whatsapp_status)}</strong>
+          <strong>{labelWhatsapp(activeEpisode?.whatsapp_status)}</strong>
         </div>
       </header>
 
       <section className="hero">
-        <div>
-          <p className="date">{episode ? episode.episode_date_br : "Nenhum episodio gerado"}</p>
-          <h2>{episode?.title || "Aguardando o primeiro radar"}</h2>
-          <p>{episode?.executive_summary || "Execute o job diario para coletar noticias e artigos academicos."}</p>
+        <div className="heroMain">
+          <p className="date">{activeEpisode ? activeEpisode.episode_date_br : "Nenhum episodio gerado"}</p>
+          <h2>{activeEpisode?.title || "Aguardando o primeiro radar"}</h2>
+          <p>{activeEpisode?.executive_summary || "Execute o job diario para coletar noticias, videos e artigos academicos."}</p>
+          <div className="heroActions">
+            <a href="#fontes">Validar fontes</a>
+            {activeEpisode?.audio_url ? <a href={activeEpisode.audio_url}>Ouvir audio</a> : null}
+          </div>
         </div>
         <div className="audioPanel">
           <span>Audio do dia</span>
-          {episode?.audio_url ? (
-            <audio controls src={episode.audio_url} />
+          {activeEpisode?.audio_url ? (
+            <audio controls src={activeEpisode.audio_url} />
           ) : (
-            <p>Audio ainda nao gerado. Configure OPENAI_API_KEY para ativar TTS.</p>
+            <p>Audio ainda nao gerado.</p>
           )}
         </div>
       </section>
 
       <section className="statsGrid">
         <StatCard label="Episodios" value={stats.episodes} />
-        <StatCard label="Fontes" value={stats.sources} />
-        <StatCard label="Pendentes" value={stats.pending_validation} />
-        <StatCard label="Custo estimado" value={`US$ ${(episode?.estimated_cost_usd || 0).toFixed(4)}`} />
+        <StatCard label="Fontes salvas" value={stats.sources} />
+        <StatCard label="Pendentes neste dia" value={pendingInEpisode} />
+        <StatCard label="Custo estimado" value={`${formatUsd(activeEpisode?.estimated_cost_usd || 0)} / ${formatBrl(activeEpisode?.estimated_cost_brl || 0)}`} />
       </section>
 
       <section className="costPanel">
-        <span>Uso do episodio</span>
-        <strong>
-          Texto: {(episode?.summary_input_tokens || 0) + (episode?.script_input_tokens || 0)} tokens de entrada,
-          {" "}
-          {(episode?.summary_output_tokens || 0) + (episode?.script_output_tokens || 0)} de saida.
-          {" "}
-          Audio: {episode?.estimated_audio_minutes?.toFixed(1) || "0.0"} min estimados.
-        </strong>
+        <div>
+          <span>Uso do episodio</span>
+          <strong>
+            Texto: {(activeEpisode?.summary_input_tokens || 0) + (activeEpisode?.script_input_tokens || 0)} tokens de entrada,
+            {" "}
+            {(activeEpisode?.summary_output_tokens || 0) + (activeEpisode?.script_output_tokens || 0)} de saida.
+            {" "}
+            Audio: {activeEpisode?.estimated_audio_minutes?.toFixed(1) || "0.0"} min estimados.
+          </strong>
+        </div>
+        <div>
+          <span>Gerado em</span>
+          <strong>{activeEpisode?.created_at_br || "Aguardando geracao"}</strong>
+        </div>
+      </section>
+
+      <section className="historyPanel">
+        <div className="sectionHeader compact">
+          <p className="eyebrow">Historico</p>
+          <h3>Tudo que ja foi gerado</h3>
+        </div>
+        <div className="episodeStrip">
+          {episodes.length === 0 ? (
+            <p className="empty">Nenhum registro diario ainda.</p>
+          ) : (
+            episodes.map((item) => (
+              <Link
+                className={`episodeCard ${activeEpisode?.id === item.id ? "active" : ""}`}
+                href={`/?date=${item.episode_date}`}
+                key={item.id}
+              >
+                <span>{item.episode_date_short_br}</span>
+                <strong>{formatUsd(item.estimated_cost_usd)} / {formatBrl(item.estimated_cost_brl)}</strong>
+                <small>{labelWhatsapp(item.whatsapp_status)}</small>
+              </Link>
+            ))
+          )}
+        </div>
       </section>
 
       <section className="grid">
@@ -142,20 +203,28 @@ export default async function Home() {
             <p className="eyebrow">Briefing</p>
             <h3>Resumo e contexto</h3>
           </div>
-          <pre>{episode?.briefing_markdown || "Sem briefing disponivel."}</pre>
+          <pre>{activeEpisode?.briefing_markdown || "Sem briefing disponivel."}</pre>
         </article>
 
-        <aside className="sources">
-          <div className="sectionHeader">
-            <p className="eyebrow">Validacao</p>
-            <h3>Fontes deste episodio</h3>
+        <aside className="sources" id="fontes">
+          <div className="sectionHeader sourceHeader">
+            <div>
+              <p className="eyebrow">Validacao</p>
+              <h3>Fontes deste episodio</h3>
+            </div>
+            {activeEpisode ? (
+              <form action={validateEpisodeSources}>
+                <input name="episodeId" type="hidden" value={activeEpisode.id} />
+                <button name="status" type="submit" value="trusted">Aprovar tudo</button>
+              </form>
+            ) : null}
           </div>
           <div className="sourceList">
             {sources.length === 0 ? (
               <p className="empty">Nenhuma fonte coletada ainda.</p>
             ) : (
               <>
-                <SourceGroup title="Noticias e tecnologia" sources={generalSources} />
+                <SourceGroup title="Noticias, videos e tecnologia" sources={generalSources} />
                 <SourceGroup title="Artigos academicos" sources={academicSources} />
               </>
             )}
@@ -168,7 +237,7 @@ export default async function Home() {
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <div>
+    <div className="statCard">
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -182,7 +251,10 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
       <h4>{title}</h4>
       {sources.map((source) => (
         <div className="sourceItem" key={source.id}>
-          <span>{source.source_name}</span>
+          <div className="sourceMeta">
+            <span>{source.source_name}</span>
+            <em className={`pill ${source.validation_status}`}>{labelValidation(source.validation_status)}</em>
+          </div>
           <a href={source.url} rel="noreferrer" target="_blank">
             <strong>{source.title}</strong>
           </a>
@@ -190,7 +262,6 @@ function SourceGroup({ title, sources }: { title: string; sources: Source[] }) {
             {source.category} | {source.source_type} | confiabilidade {source.reliability_score.toFixed(1)}
           </small>
           {source.published_at_br ? <small>Publicado em: {source.published_at_br}</small> : null}
-          <small>Status: {labelValidation(source.validation_status)}</small>
           <form action={validateSource} className="validationActions">
             <input name="sourceId" type="hidden" value={source.id} />
             <button name="status" type="submit" value="trusted">Confiavel</button>
@@ -220,4 +291,12 @@ function labelWhatsapp(status?: string) {
     not_sent: "pendente",
   };
   return labels[status || "not_sent"] || status;
+}
+
+function formatUsd(value: number) {
+  return `US$ ${value.toFixed(4)}`;
+}
+
+function formatBrl(value: number) {
+  return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

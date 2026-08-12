@@ -11,7 +11,7 @@ from radar_api.agents.summarizer import generate_briefing
 from radar_api.collectors import collect_arxiv, collect_rss
 from radar_api.config import get_settings
 from radar_api.db import SessionLocal, init_db
-from radar_api.models import EpisodeItem, SourceItem
+from radar_api.models import Episode, EpisodeItem, SourceItem
 from radar_api.storage import create_episode, source_to_export, upsert_source_items
 from radar_api.utils.dates import format_date_br, today_local
 
@@ -30,7 +30,7 @@ async def run_daily_pipeline(target_date: str | None = None):
     episode_date = target_date or today_local().isoformat()
     collected = await collect_all()
     with SessionLocal() as session:
-        filtered = filter_previously_used(session, collected)
+        filtered = filter_previously_used(session, collected, episode_date)
     selected = select_top_items(filtered, limit=18)
     executive, briefing, briefing_result = generate_briefing(selected)
     script_result = generate_script(briefing)
@@ -83,10 +83,12 @@ async def run_daily_pipeline(target_date: str | None = None):
         return episode
 
 
-def filter_previously_used(session, items: list) -> list:
+def filter_previously_used(session, items: list, episode_date: str) -> list:
     used = (
         session.query(SourceItem.url, SourceItem.title)
         .join(EpisodeItem, EpisodeItem.source_item_id == SourceItem.id)
+        .join(Episode, Episode.id == EpisodeItem.episode_id)
+        .filter(Episode.episode_date != episode_date)
         .all()
     )
     used_urls = {url for url, _ in used}
