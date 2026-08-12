@@ -6,7 +6,7 @@ Busca noticias em feeds RSS e fontes tecnicas. Prioriza fonte primaria quando di
 
 ## Coletor academico
 
-Busca artigos recentes no arXiv em categorias e consultas ligadas a:
+Busca artigos recentes em arXiv, RSS academicos e indexadores publicos como Crossref e Semantic Scholar, cobrindo editoras e veiculos como ACM, IEEE, Nature, Springer, Elsevier, MIT Press e Communications of the ACM quando houver itens recentes. O coletor prioriza pesquisas ligadas a:
 
 - IA;
 - machine learning;
@@ -17,6 +17,8 @@ Busca artigos recentes no arXiv em categorias e consultas ligadas a:
 - modelos de linguagem.
 
 Os artigos podem estar em ingles, mas resumo, impacto e conversa final devem ser em portugues do Brasil.
+
+Para cada pesquisa selecionada, o briefing deve trazer titulo original, fonte/editora, autores, data brasileira de publicacao/atualizacao, objetivo, metodologia, discussoes e principais resultados, conclusao curta, proximos caminhos e link de validacao. Se a fonte nao fornecer abstract ou detalhes suficientes, o texto deve marcar `nao informado no resumo disponivel`.
 
 ## Curador
 

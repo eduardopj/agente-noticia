@@ -5,6 +5,7 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
     reliability = {
         "primary": 9.0,
         "paper": 8.5,
+        "academic_press": 7.8,
         "press_br": 7.0,
         "press": 6.5,
         "video": 6.0,
@@ -20,6 +21,10 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
         "curso em video",
         "mano deyvin",
         "filipe deschamps",
+        "acm",
+        "ieee",
+        "nature machine intelligence",
+        "communications of the acm",
     ]
     source_boost = 1.0 if any(source in item.source_name.lower() for source in preferred_sources) else 0.0
     relevance_terms = [
@@ -50,6 +55,11 @@ def heuristic_scores(item: CollectedItem) -> tuple[float, float, float]:
         "reasoning",
         "transformer",
         "arxiv",
+        "acm",
+        "ieee",
+        "communications of the acm",
+        "nature machine intelligence",
+        "semantic scholar",
         "paper",
         "dataset",
         "evaluation",
@@ -99,7 +109,7 @@ def select_top_items(items: list[CollectedItem], limit: int = 18) -> list[Collec
         "ia_dev": 4,
         "mundo": 3,
         "video": 3,
-        "academico": 3,
+        "academico": 5,
     }
     selected: list[CollectedItem] = []
     selected_urls: set[str] = set()

@@ -21,5 +21,7 @@ Regras:
 - Explique quando a fonte for paper, release de empresa, imprensa ou agregador.
 - Seja cetico com marketing.
 - Resuma artigos academicos em linguagem clara, sem perder rigor.
+- Na secao academica, para cada pesquisa selecionada, inclua titulo original, fonte/editora, autores, objetivo, metodologia, discussoes e principais resultados, breve conclusao, o que esperar no futuro e link de validacao.
+- Se abstract/metadados nao informarem metodologia, resultados ou conclusao, escreva `nao informado no resumo disponivel`; nao preencha lacunas com suposicoes.
 - Nao deixe papers dominarem o briefing: eles devem complementar o panorama de noticias.
 - Priorize impacto pratico para professor, desenvolvedor e decisor tecnico.

@@ -9,7 +9,7 @@ from radar_api.agents.costs import estimate_text_cost_usd, estimate_tts_cost_usd
 from radar_api.agents.curator import select_top_items
 from radar_api.agents.scriptwriter import generate_script
 from radar_api.agents.summarizer import generate_briefing
-from radar_api.collectors import collect_arxiv, collect_rss
+from radar_api.collectors import collect_academic, collect_rss
 from radar_api.config import get_settings
 from radar_api.db import SessionLocal, init_db
 from radar_api.models import Episode, EpisodeItem, SourceItem
@@ -20,7 +20,7 @@ from radar_api.utils.dates import app_timezone, format_date_br, today_local
 async def collect_all() -> list:
     rss_items, academic_items = await asyncio.gather(
         collect_rss(),
-        collect_arxiv(max_results_per_query=3),
+        collect_academic(max_results_per_query=4),
     )
     unique = {item.url: item for item in [*rss_items, *academic_items]}
     return list(unique.values())
@@ -33,7 +33,7 @@ async def run_daily_pipeline(target_date: str | None = None):
     collected = filter_recent_items(collected, days=7)
     with SessionLocal() as session:
         filtered = filter_previously_used(session, collected, episode_date)
-    selected = select_top_items(filtered, limit=18)
+    selected = select_top_items(filtered, limit=22)
     executive, briefing, briefing_result = generate_briefing(selected)
     script_result = generate_script(briefing)
     script = script_result.text

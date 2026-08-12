@@ -87,7 +87,7 @@ Importe `infra/n8n/daily-radar.workflow.json`, ajuste:
 
 ## Escopo academico
 
-O coletor academico consulta arXiv para temas como:
+O coletor academico consulta arXiv, RSS academicos e indexadores publicos como Crossref e Semantic Scholar. Ele tenta cobrir ACM, IEEE, Nature, Springer, Elsevier, MIT Press e outras fontes formais quando houver publicacoes recentes em:
 
 - artificial intelligence;
 - machine learning;
@@ -99,3 +99,5 @@ O coletor academico consulta arXiv para temas como:
 - natural language processing.
 
 Artigos em ingles sao resumidos em portugues do Brasil, mantendo titulo original, link, autores e uma explicacao pratica para professor/desenvolvedor.
+
+Na secao academica do briefing, cada pesquisa selecionada deve trazer objetivo, metodologia, discussoes e principais resultados, breve conclusao e o que esperar no futuro. Quando os metadados publicos nao trouxerem algum detalhe, o sistema registra `nao informado no resumo disponivel` em vez de inventar informacao.

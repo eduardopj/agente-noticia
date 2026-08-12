@@ -183,3 +183,60 @@ ARXIV_QUERIES = [
     'all:"neural networks"',
     'all:"machine learning"',
 ]
+
+ACADEMIC_SEARCH_QUERIES = [
+    "artificial intelligence",
+    "machine learning",
+    "large language models",
+    "AI agents",
+    "neural networks",
+    "computer vision",
+    "natural language processing",
+    "software engineering AI",
+    "cybersecurity artificial intelligence",
+    "educational technology artificial intelligence",
+]
+
+ACADEMIC_PUBLISHERS = [
+    "Association for Computing Machinery",
+    "ACM",
+    "IEEE",
+    "Institute of Electrical and Electronics Engineers",
+    "Springer Nature",
+    "Elsevier",
+    "AAAI",
+    "MIT Press",
+]
+
+ACADEMIC_RSS_FEEDS = [
+    {
+        "name": "Communications of the ACM",
+        "url": "https://cacm.acm.org/feed/",
+        "type": "paper",
+        "category": "academico",
+    },
+    {
+        "name": "IEEE Spectrum",
+        "url": "https://spectrum.ieee.org/feeds/feed.rss",
+        "type": "academic_press",
+        "category": "academico",
+    },
+    {
+        "name": "Nature Machine Intelligence",
+        "url": "https://www.nature.com/natmachintell.rss",
+        "type": "paper",
+        "category": "academico",
+    },
+    {
+        "name": "Nature Technology",
+        "url": "https://www.nature.com/subjects/technology.rss",
+        "type": "paper",
+        "category": "academico",
+    },
+    {
+        "name": "MIT Press - Artificial Intelligence",
+        "url": "https://direct.mit.edu/rss/site_1000041/1000059.xml",
+        "type": "paper",
+        "category": "academico",
+    },
+]
