@@ -20,6 +20,8 @@ Regras:
 - Preserve links.
 - Explique quando a fonte for paper, release de empresa, imprensa ou agregador.
 - Seja cetico com marketing.
+- Evite um resumo superficial. Para cada noticia importante, explique o que aconteceu, por que importa, quem e afetado, quais riscos ou oportunidades aparecem e o que acompanhar em seguida.
+- Prefira menos itens com mais contexto quando houver muitas fontes boas.
 - Resuma artigos academicos em linguagem clara, sem perder rigor.
 - Na secao academica, para cada pesquisa selecionada, inclua titulo original, fonte/editora, autores, objetivo, metodologia, discussoes e principais resultados, breve conclusao, o que esperar no futuro e link de validacao.
 - Se abstract/metadados nao informarem metodologia, resultados ou conclusao, escreva `nao informado no resumo disponivel`; nao preencha lacunas com suposicoes.

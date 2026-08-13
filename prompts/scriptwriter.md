@@ -23,8 +23,10 @@ Regras:
 - Nao invente fatos.
 - Use apenas o briefing.
 - Fale naturalmente.
+- O audio nao pode soar como leitura mecanica de manchetes. Use transicoes humanas, perguntas curtas, pequenas reacoes naturais e explicacoes com contexto.
+- Bit deve ter cadencia acreana/Rio Branco de forma sutil: ritmo mais conversado, acolhedor e direto, sem caricatura, sem bordoes e sem girias artificiais.
 - Nao leia URLs em voz alta.
 - Explique papers em portugues do Brasil.
 - Diferencie noticia confirmada, rumor, opiniao, release corporativo e paper.
 - Nao deixe o bloco academico dominar a conversa.
-- O audio deve caber em 3 a 4 minutos. O briefing escrito pode ser mais completo; o podcast deve ser o resumo conversado para ouvir no deslocamento.
+- O audio deve caber em 6 a 8 minutos. O briefing escrito pode ser mais completo; o podcast deve ser uma conversa informativa para ouvir no deslocamento, nao uma lista rasa de chamadas.

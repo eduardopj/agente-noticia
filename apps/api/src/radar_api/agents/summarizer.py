@@ -68,6 +68,9 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]
                     "Ao explicar pesquisas academicas, extraia apenas o que estiver sustentado pelo titulo, "
                     "abstract, fonte e metadados. Se faltar informacao, diga explicitamente que a fonte nao "
                     "traz aquele detalhe no resumo disponivel. "
+                    "Evite briefing superficial: cada item importante precisa explicar contexto, consequencia, "
+                    "risco, oportunidade pratica e o que o leitor deve fazer ou acompanhar. "
+                    "Prefira menos itens com mais profundidade quando houver excesso de fontes. "
                     "Nao deixe os artigos academicos dominarem o briefing quando houver noticias relevantes."
                 ),
             },
@@ -83,6 +86,8 @@ def generate_briefing(items: list[CollectedItem]) -> tuple[str, str, TextResult]
                     "Em Brasil, priorize sites brasileiros e impacto local. "
                     "Em Mundo, priorize tendencias globais, produtos, chips, seguranca, big techs e startups. "
                     "Em Videos e canais, destaque videos novos quando forem relevantes. "
+                    "Para noticias importantes, responda claramente: o que aconteceu, por que aconteceu, "
+                    "quem e afetado, qual impacto pratico, quais incertezas existem e qual proximo sinal acompanhar. "
                     "Em Artigos academicos, selecione ate 5 trabalhos entre arXiv, ACM, IEEE, Nature, Springer, "
                     "Elsevier, MIT Press e Semantic Scholar quando houver itens relevantes. Para cada pesquisa, "
                     "use este formato: Titulo original; fonte/editora; autores; publicado em; atualizado em "
